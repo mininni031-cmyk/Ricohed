@@ -31,10 +31,10 @@ export const GRAVITY_SHIFT = {
 // v2.6 catch rules (same for ground and air). Distance: eye -> disc centre.
 // Tested along the disc's path between simulation sub-steps (no tunnelling).
 export const CATCH = {
-  range: 3.10,       // m: slightly more forgiving player catches
-  angleDeg: 72,      // max angle between the aim and the disc
-  window: 0.90,      // s after pressing CATCH
-  rescue: 0.38,      // s: short late-catch grace period
+  range: 2.5,        // m (v2.9.3: 3.10)
+  angleDeg: 62,      // max angle between the aim and the disc (v2.9.3: 72)
+  window: 0.75,      // s after pressing CATCH (v2.9.3: 0.90)
+  rescue: 0.30,      // s: short late-catch grace period (v2.9.3: 0.38)
   cooldown: 0.15,     // s after a window that caught nothing
   suctionTime: 0.1,  // s visual pull of the disc into the hand on success
   justWindow: 0.15, // seconds either side of entering the catch zone
@@ -57,7 +57,7 @@ export const GOAL_SCALE = 1;
 
 export const CONFIG = {
   GOAL_SCALE,
-  VERSION: '2.9.3',
+  VERSION: '2.9.4',
   MATCH_TIME: 180,
   SIM_STEP: 1 / 120,          // fixed simulation step (deterministic, frame-rate independent)
 

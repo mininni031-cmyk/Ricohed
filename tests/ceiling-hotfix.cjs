@@ -72,15 +72,15 @@ run('4. Panel spacing and collider orientation consistency',()=>{
 });
 // 5. Catch envelope & handoff assets are consistent with this release.
 run('5. Catch, source/bundle config, and cache-busted deployment asset',()=>{
- assert.equal(R.CATCH.range,3.1);assert.equal(R.CATCH.angleDeg,72);assert.equal(R.CATCH.window,.9);assert.equal(R.CATCH.rescue,.38);
+ assert.equal(R.CATCH.range,2.5);assert.equal(R.CATCH.angleDeg,62);assert.equal(R.CATCH.window,.75);assert.equal(R.CATCH.rescue,.3);
  const target=(d,degree)=>{const theta=degree*Math.PI/180;const p=V(d*Math.cos(theta),0,d*Math.sin(theta));return {state:'FLYING',pos:p,prevPos:p.clone(),vel:p.clone().negate()};};
- assert.equal(R.evalCatch(R.CATCH,V(),V(1,0,0),target(3,68),[]).ok,true);
- assert.equal(R.evalCatch(R.CATCH,V(),V(1,0,0),target(3.15,0),[]).ok,false);
- assert.equal(R.evalCatch(R.CATCH,V(),V(1,0,0),target(2,76),[]).ok,false);
+ assert.equal(R.evalCatch(R.CATCH,V(),V(1,0,0),target(2.4,58),[]).ok,true);
+ assert.equal(R.evalCatch(R.CATCH,V(),V(1,0,0),target(2.55,0),[]).ok,false);
+ assert.equal(R.evalCatch(R.CATCH,V(),V(1,0,0),target(2,66),[]).ok,false);
  const bundle=fs.readFileSync(path.join(root,'ricochet.js'),'utf8'),source=fs.readFileSync(path.join(root,'src/athlete.js'),'utf8'),config=fs.readFileSync(path.join(root,'src/config.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),arena=fs.readFileSync(path.join(root,'src/arena.js'),'utf8');
  assert.ok(source.includes('touchingRoof()'),'roof contact rule missing in source');
  assert.ok(/CEILING_Y:-4\.2|CEILING_Y:-4\.2/.test(bundle.replace(/\s/g,'')),'browser bundle not rebuilt with the 6.8 m roof');
- assert.ok(config.includes('CEILING_Y: -4.2')&&config.includes('range: 3.10')&&config.includes('angleDeg: 72'));
+ assert.ok(config.includes('CEILING_Y: -4.2')&&config.includes('range: 2.5,')&&config.includes('angleDeg: 62,'));
  assert.ok(arena.includes('const CY = ROOM.CEILING_Y') && arena.includes('m.position.y = CY'));
  const version=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8')).version;
  assert.ok(html.includes(`ricochet.js?v=${version}`),'index.html must cache-bust ricochet.js with the package version');
