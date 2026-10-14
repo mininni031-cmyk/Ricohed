@@ -1,0 +1,350 @@
+{
+  "normal": {
+    "scale": 1,
+    "opening": 2.6,
+    "centerHeight": 1.4,
+    "visualSync": true,
+    "trials": [
+      {
+        "seed": 1,
+        "keepers": false,
+        "shots": 200,
+        "goals": 46,
+        "saves": 0,
+        "rim": 41,
+        "direct": {
+          "shots": 100,
+          "goals": 23
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 23
+        }
+      },
+      {
+        "seed": 1,
+        "keepers": true,
+        "shots": 200,
+        "goals": 29,
+        "saves": 44,
+        "rim": 34,
+        "direct": {
+          "shots": 100,
+          "goals": 11
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 18
+        }
+      },
+      {
+        "seed": 2,
+        "keepers": false,
+        "shots": 200,
+        "goals": 45,
+        "saves": 0,
+        "rim": 46,
+        "direct": {
+          "shots": 100,
+          "goals": 20
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 25
+        }
+      },
+      {
+        "seed": 2,
+        "keepers": true,
+        "shots": 200,
+        "goals": 25,
+        "saves": 60,
+        "rim": 32,
+        "direct": {
+          "shots": 100,
+          "goals": 8
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 17
+        }
+      },
+      {
+        "seed": 3,
+        "keepers": false,
+        "shots": 200,
+        "goals": 45,
+        "saves": 0,
+        "rim": 39,
+        "direct": {
+          "shots": 100,
+          "goals": 22
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 23
+        }
+      },
+      {
+        "seed": 3,
+        "keepers": true,
+        "shots": 200,
+        "goals": 22,
+        "saves": 60,
+        "rim": 27,
+        "direct": {
+          "shots": 100,
+          "goals": 8
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 14
+        }
+      },
+      {
+        "seed": 4,
+        "keepers": false,
+        "shots": 200,
+        "goals": 51,
+        "saves": 0,
+        "rim": 38,
+        "direct": {
+          "shots": 100,
+          "goals": 21
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 30
+        }
+      },
+      {
+        "seed": 4,
+        "keepers": true,
+        "shots": 200,
+        "goals": 32,
+        "saves": 51,
+        "rim": 27,
+        "direct": {
+          "shots": 100,
+          "goals": 9
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 23
+        }
+      },
+      {
+        "seed": 5,
+        "keepers": false,
+        "shots": 200,
+        "goals": 45,
+        "saves": 0,
+        "rim": 36,
+        "direct": {
+          "shots": 100,
+          "goals": 27
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 18
+        }
+      },
+      {
+        "seed": 5,
+        "keepers": true,
+        "shots": 200,
+        "goals": 26,
+        "saves": 52,
+        "rim": 23,
+        "direct": {
+          "shots": 100,
+          "goals": 11
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 15
+        }
+      }
+    ]
+  },
+  "large": {
+    "scale": 1.5,
+    "opening": 3.9000000000000004,
+    "centerHeight": 2.0999999999999996,
+    "visualSync": true,
+    "trials": [
+      {
+        "seed": 1,
+        "keepers": false,
+        "shots": 200,
+        "goals": 91,
+        "saves": 0,
+        "rim": 78,
+        "direct": {
+          "shots": 100,
+          "goals": 49
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 42
+        }
+      },
+      {
+        "seed": 1,
+        "keepers": true,
+        "shots": 200,
+        "goals": 68,
+        "saves": 37,
+        "rim": 70,
+        "direct": {
+          "shots": 100,
+          "goals": 36
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 32
+        }
+      },
+      {
+        "seed": 2,
+        "keepers": false,
+        "shots": 200,
+        "goals": 98,
+        "saves": 0,
+        "rim": 75,
+        "direct": {
+          "shots": 100,
+          "goals": 41
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 57
+        }
+      },
+      {
+        "seed": 2,
+        "keepers": true,
+        "shots": 200,
+        "goals": 70,
+        "saves": 46,
+        "rim": 61,
+        "direct": {
+          "shots": 100,
+          "goals": 24
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 46
+        }
+      },
+      {
+        "seed": 3,
+        "keepers": false,
+        "shots": 200,
+        "goals": 91,
+        "saves": 0,
+        "rim": 74,
+        "direct": {
+          "shots": 100,
+          "goals": 48
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 43
+        }
+      },
+      {
+        "seed": 3,
+        "keepers": true,
+        "shots": 200,
+        "goals": 62,
+        "saves": 48,
+        "rim": 62,
+        "direct": {
+          "shots": 100,
+          "goals": 31
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 31
+        }
+      },
+      {
+        "seed": 4,
+        "keepers": false,
+        "shots": 200,
+        "goals": 96,
+        "saves": 0,
+        "rim": 71,
+        "direct": {
+          "shots": 100,
+          "goals": 41
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 55
+        }
+      },
+      {
+        "seed": 4,
+        "keepers": true,
+        "shots": 200,
+        "goals": 64,
+        "saves": 42,
+        "rim": 66,
+        "direct": {
+          "shots": 100,
+          "goals": 23
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 41
+        }
+      },
+      {
+        "seed": 5,
+        "keepers": false,
+        "shots": 200,
+        "goals": 93,
+        "saves": 0,
+        "rim": 71,
+        "direct": {
+          "shots": 100,
+          "goals": 53
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 40
+        }
+      },
+      {
+        "seed": 5,
+        "keepers": true,
+        "shots": 200,
+        "goals": 66,
+        "saves": 43,
+        "rim": 63,
+        "direct": {
+          "shots": 100,
+          "goals": 34
+        },
+        "bank": {
+          "shots": 100,
+          "goals": 32
+        }
+      }
+    ]
+  },
+  "curve": {
+    "old": {
+      "forward": 15.056535940239616,
+      "side": 4.772423495811521,
+      "degrees": 27.931692512627638
+    },
+    "new": {
+      "forward": 13.432811329913964,
+      "side": 7.411218607113049,
+      "degrees": 57.29577951308232
+    }
+  }
+}

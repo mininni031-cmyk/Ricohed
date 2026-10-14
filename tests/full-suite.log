@@ -1,0 +1,313 @@
+
+TEST core.cjs
+PASS stage width 28m and ceiling 10m
+PASS goal center floor+2
+PASS ellipse scores 0,0
+PASS ellipse scores 1.85,0
+PASS ellipse scores 0,1.15
+PASS ellipse scores 1.4,0.7
+PASS ellipse rejects 0,1.3
+PASS ellipse rejects 2.05,0
+PASS ellipse rejects 1.8,0.7
+PASS ellipse fast rim contact single event
+PASS points 0
+PASS points 1
+PASS points 2
+PASS points 5
+PASS curve total 25 degrees symmetric and constant speed
+Core passed 15
+
+TEST shot.cjs
+PASS curve base 14 and charge/counter/wall multiply
+PASS prediction matches real curve -1 dir 1,0,0
+PASS prediction matches real curve -1 dir 1,0.1,2
+PASS prediction matches real curve -1 dir 0.1,0,1
+PASS prediction matches real curve 0 dir 1,0,0
+PASS prediction matches real curve 0 dir 1,0.1,2
+PASS prediction matches real curve 0 dir 0.1,0,1
+PASS prediction matches real curve 1 dir 1,0,0
+PASS prediction matches real curve 1 dir 1,0.1,2
+PASS prediction matches real curve 1 dir 0.1,0,1
+Shot tests 10 passed
+
+TEST match.cjs
+Match simulation movement, input sequence, both shots, both scoring, match end PASS
+Both online teams: actual catch input, just counter and same-step catch/shoot PASS
+
+TEST online.cjs
+Online rooms, ready, authority, validation, stale sequence, reconnect, expiry, Origin PASS
+
+TEST run_v29.cjs
+{
+  "results": [
+    {
+      "name": "stage dimensions and wall kick",
+      "pass": true
+    },
+    {
+      "name": "just boundary -0.151",
+      "pass": true
+    },
+    {
+      "name": "just boundary -0.15",
+      "pass": true
+    },
+    {
+      "name": "just boundary 0",
+      "pass": true
+    },
+    {
+      "name": "just boundary 0.15",
+      "pass": true
+    },
+    {
+      "name": "just boundary 0.151",
+      "pass": true
+    },
+    {
+      "name": "counter speed 0",
+      "pass": true
+    },
+    {
+      "name": "immediate throw state 0",
+      "pass": true
+    },
+    {
+      "name": "counter speed 0.6",
+      "pass": true
+    },
+    {
+      "name": "immediate throw state 0.6",
+      "pass": true
+    },
+    {
+      "name": "counter speed 0.601",
+      "pass": true
+    },
+    {
+      "name": "immediate throw state 0.601",
+      "pass": true
+    },
+    {
+      "name": "same-step shoot buffer",
+      "pass": true
+    },
+    {
+      "name": "normal catch no bonus",
+      "pass": true
+    },
+    {
+      "name": "actual catch button",
+      "pass": true
+    },
+    {
+      "name": "counter HUD",
+      "pass": true
+    },
+    {
+      "name": "dash display blocked",
+      "pass": true
+    },
+    {
+      "name": "occlusion rejects catch",
+      "pass": true
+    },
+    {
+      "name": "old flight cannot late rescue",
+      "pass": true
+    },
+    {
+      "name": "peripheral catch inside 80deg",
+      "pass": true
+    },
+    {
+      "name": "early normal catch window",
+      "pass": true
+    },
+    {
+      "name": "real input catch and buffered counter",
+      "pass": true
+    },
+    {
+      "name": "scoring direct",
+      "pass": true
+    },
+    {
+      "name": "scoring one",
+      "pass": true
+    },
+    {
+      "name": "scoring two",
+      "pass": true
+    },
+    {
+      "name": "late rescue during active window",
+      "pass": true
+    },
+    {
+      "name": "expired rescue rejected",
+      "pass": true
+    },
+    {
+      "name": "CPU match simulation",
+      "pass": true
+    },
+    {
+      "name": "curve left selection",
+      "pass": true
+    },
+    {
+      "name": "curve bends left",
+      "pass": true
+    },
+    {
+      "name": "full charge release fires",
+      "pass": true
+    },
+    {
+      "name": "default shot unchanged",
+      "pass": true
+    },
+    {
+      "name": "curve bends right",
+      "pass": true
+    },
+    {
+      "name": "charge HUD 50%",
+      "pass": true
+    },
+    {
+      "name": "half charge 19.2",
+      "pass": true
+    },
+    {
+      "name": "pause cancels charge",
+      "pass": true
+    },
+    {
+      "name": "CPU stays normal",
+      "pass": true
+    },
+    {
+      "name": "wall shot accuracy",
+      "pass": true
+    },
+    {
+      "name": "wall shot speed",
+      "pass": true
+    },
+    {
+      "name": "wall boost boundary 0.8",
+      "pass": true
+    },
+    {
+      "name": "wall boost boundary 0.801",
+      "pass": true
+    },
+    {
+      "name": "real wallkick activates boost",
+      "pass": true
+    },
+    {
+      "name": "wall shot HUD",
+      "pass": true
+    },
+    {
+      "name": "wall bonus consumed",
+      "pass": true
+    },
+    {
+      "name": "wall plus just stack",
+      "pass": true
+    },
+    {
+      "name": "landing cancels wall bonus",
+      "pass": true
+    },
+    {
+      "name": "goal opening width and height x1.5",
+      "pass": true
+    },
+    {
+      "name": "clearer curve angle",
+      "pass": true
+    },
+    {
+      "name": "visible curved direction guide",
+      "pass": true
+    },
+    {
+      "name": "straight prediction visible",
+      "pass": true
+    },
+    {
+      "name": "trajectory legend",
+      "pass": true
+    },
+    {
+      "name": "E cycles to -1",
+      "pass": true
+    },
+    {
+      "name": "E never catches -1",
+      "pass": true
+    },
+    {
+      "name": "E cycles to 1",
+      "pass": true
+    },
+    {
+      "name": "E never catches 1",
+      "pass": true
+    },
+    {
+      "name": "E cycles to 0",
+      "pass": true
+    },
+    {
+      "name": "E never catches 0",
+      "pass": true
+    },
+    {
+      "name": "E controls in HUD",
+      "pass": true
+    },
+    {
+      "name": "2.9m now outside",
+      "pass": true
+    },
+    {
+      "name": "2.7m stays catchable",
+      "pass": true
+    },
+    {
+      "name": "82deg now outside",
+      "pass": true
+    },
+    {
+      "name": "78deg stays catchable",
+      "pass": true
+    },
+    {
+      "name": "catch timing unchanged",
+      "pass": true
+    }
+  ],
+  "errors": []
+}
+
+TEST online-browser.cjs
+opening player 0
+opening player 1
+Online browser 11 checks passed; JS errors 0
+
+TEST mobile.cjs
+Mobile and offline 5 checks PASS, JS errors 0
+
+TEST review-regressions.cjs
+Review regressions: full prediction buffer and disconnect status PASS
+
+TEST long-match.cjs
+Full 3-minute CPU match PASS {"state":"ended","timeLeft":0,"steps":22431,"score":{"cyan":0,"pink":3},"cpuShots":14,"cpuGoals":2,"finite":true,"shift":false}
+
+ALL CURRENT TEST SUITES PASS

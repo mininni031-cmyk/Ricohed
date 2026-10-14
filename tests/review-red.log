@@ -1,0 +1,19 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   'prediction buffer truncated: {"allocated":25,"drawn":61}',
++   'straight shot keeps curve color ffdc63',
++   'new online match retains stale guide clock',
++   'disconnected UI hides failure: ONLINE · TEAM CYAN · 往復 1ms'
++ ]
+- []
+
+    at C:\Users\localuser\Documents\Codex\2026-10-14\referenced-chatgpt-conversation-this-is-an-2\work\v29\tests\review-regressions.cjs:13:32 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [Array],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}

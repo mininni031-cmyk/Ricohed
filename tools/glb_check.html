@@ -1,0 +1,12 @@
+<!doctype html><html><body style="margin:0;background:#cdd5e6">
+<script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js","three/addons/":"../node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three'; import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const r=new THREE.WebGLRenderer({antialias:true}); r.setSize(480,640); document.body.appendChild(r.domElement);
+const s=new THREE.Scene(); s.background=new THREE.Color(0xcdd5e6); s.add(new THREE.HemisphereLight(0xffffff,0x8090b0,2.2)); const d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(1,2,3); s.add(d);
+const c=new THREE.PerspectiveCamera(30,480/640,0.1,50); c.position.set(0,1.0,4.2); c.lookAt(0,0.9,0);
+new GLTFLoader().load('../assets/keeper/keeper_pink.glb',(g)=>{ s.add(g.scene); let skinned=0,meshes=0,bones=new Set(); g.scene.traverse(o=>{ if(o.isMesh)meshes++; if(o.isSkinnedMesh){skinned++; o.skeleton.bones.forEach(b=>bones.add(b.name));} });
+  const ua=g.scene.getObjectByName('upper_armL')||g.scene.getObjectByName('upper_arm.L'); if(ua) ua.rotateZ(1.6);
+  const box=new THREE.Box3().setFromObject(g.scene); r.render(s,c);
+  window.__glb={meshes,skinned,bones:[...bones],height:+(box.max.y-box.min.y).toFixed(3),posed:!!ua};});
+</script></body></html>

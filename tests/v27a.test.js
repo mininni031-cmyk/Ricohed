@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import { Game } from '../src/game.js';
+import { CATCH, CONFIG, ROOM } from '../src/config.js';
+const g = Object.create(Game.prototype);
+g.player = {holding:true, shootCd:0, grounded:true, up:new THREE.Vector3(0,1,0), eye:()=>new THREE.Vector3(), justUntil:10.6};
+g.simTime=10; g.suction={t:0}; g.forward=v=>v.set(1,0,0); g.flatRight=v=>v.set(0,0,1); g.up=v=>v.set(0,1,0);
+g.applyAirSpread=v=>v; g.disc={launch:(o,d,w,s)=>{g.speed=s;},}; g.trail={reset(){}}; g.setDiscColor=()=>{}; g.bus={emit(){}}; g.arms={triggerThrow(){}}; g.stats={shots:0}; g.fovKick=0;g.shake=0;
+g.playerShoot();
+assert.equal(g.stats.shots,1,'catch suction must not discard immediate shot');
+assert.equal(g.speed,CONFIG.SHOT_SPEED*1.15,'just counter speed +15%');
+assert.equal(g.suction,null,'throw must cancel visual suction');
+assert.equal(ROOM.CEILING_Y+ROOM.L,10);
+assert.equal(CATCH.justWindow,0.15);
+console.log('Immediate counter, speed and stage checks PASS');

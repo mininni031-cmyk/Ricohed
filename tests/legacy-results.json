@@ -1,0 +1,157 @@
+[
+ {
+  "name": "01 Boot without errors, Three.js bundled locally",
+  "pass": true,
+  "detail": "boot 5.66s, version 2.7A, THREE r180, external requests: 0, errors: []"
+ },
+ {
+  "name": "02 Start button starts the match (countdown -> MATCH_STARTED -> team banners)",
+  "pass": true,
+  "detail": "overlay before=True, after click=countdown, after countdown=playing, hud=True, intro={'started': True, 'el': True, 'text': 'TEAM CYANYOUVSTEAM PINKCPU'}"
+ },
+ {
+  "name": "03 Pause / resume (Esc, resume button); clock and gravity clock frozen while paused",
+  "pass": true,
+  "detail": "Esc->paused (menu True), clock frozen=True, gravity clock 0.00, resume->playing"
+ },
+ {
+  "name": "04 Movement (WASD) and mouse look",
+  "pass": true,
+  "detail": "W 1s: 6.98 m (7.0 expected), D 0.5s: 3.50 m (3.5), look dyaw -0.240 dpitch 0.120"
+ },
+ {
+  "name": "05 Disc speed 16 m/s",
+  "pass": true,
+  "detail": "{\"state\": \"FLYING\", \"speed\": 16, \"cfg\": 16}"
+ },
+ {
+  "name": "06 Catch rules: 3.0 m, 70 deg, approaching only, window 0.8 s, early grace 0.25 s, cooldown 0.5 s",
+  "pass": false,
+  "detail": "{\"cfg\": {\"range\": 3, \"angleDeg\": 85, \"window\": 1.2, \"rescue\": 0.25, \"cooldown\": 0.15, \"suctionTime\": 0.1, \"justWindow\": 0.15, \"counterWindow\": 0.6, \"counterMultiplier\": 1.15, \"shotBuffer\": 0.15, \"approachSlack\": 3}, \"d29\": \"ok\", \"d31\": \"distance\", \"a65\": \"ok\", \"a75\": \"ok\", \"away\": \"ok\", \"behind\": \"angle\"}"
+ },
+ {
+  "name": "07 Ground catch with the real key (window opens on press, DISC_CAUGHT, suction + CATCH! graphic)",
+  "pass": true,
+  "detail": "{\"n\": 50, \"holding\": true, \"log\": [{\"type\": \"catch\", \"who\": \"player\", \"t\": 4.916666666666701, \"airborne\": false, \"rescued\": false, \"kickLock\": false, \"wallKicks\": 0, \"shift\": \"stable\"}], \"ev\": [{\"type\": \"DISC_CAUGHT\", \"who\": \"player\", \"rescued\": false, \"just\": true, \"airborne\": false}], \"suction\": true, \"mg\": true}"
+ },
+ {
+  "name": "08 Swept catch test (segment of the last sub-step, not only the current position)",
+  "pass": true,
+  "detail": "{\"ok\": true, \"reason\": \"ok\", \"dist\": 2, \"endA\": 4.1182520563948, \"endB\": 4.1182520563948}"
+ },
+ {
+  "name": "09 Early catch input: 0.2 s before the disc is catchable -> caught; 0.35 s -> not (grace 0.25 s)",
+  "pass": true,
+  "detail": "{\"lead0.2\": {\"caught\": true, \"press\": \"window\"}, \"lead0.35\": {\"caught\": false, \"press\": \"buffered\"}}"
+ },
+ {
+  "name": "10 Late rescue: 0.15 s after the disc left the catch zone -> caught (rescued); 0.4 s -> not",
+  "pass": false,
+  "detail": "{\"late0.15\": {\"wasCatchable\": true, \"caught\": false, \"rescued\": false}, \"late0.4\": {\"wasCatchable\": true, \"caught\": true, \"rescued\": true}}"
+ },
+ {
+  "name": "11 Catch window 0.8 s, cooldown 0.5 s after a miss, presses during the cooldown do not open a window",
+  "pass": false,
+  "detail": "{\"window0\": 1.19, \"windowSteps\": 144, \"cooldown\": 0.15, \"pressDuringCd\": \"cooldown\", \"windowDuringCd\": -0.008333333333331616, \"cooldownSteps\": 18}"
+ },
+ {
+  "name": "12 No catch through a panel; CPU has its own catch parameters (2.6 m / 60 deg / 0.5 s / 0.8 s)",
+  "pass": true,
+  "detail": "{\"panelBetween\": true, \"reason\": \"occluded\", \"withoutPanel\": \"ok\", \"cpu\": \"distance\", \"cpuCfg\": {\"range\": 2.6, \"angleDeg\": 60, \"window\": 0.5, \"cooldown\": 0.8}}"
+ },
+ {
+  "name": "13 Air catch uses the same rules",
+  "pass": true,
+  "detail": "{\"caught\": true, \"airborne\": true, \"height\": 3.53}"
+ },
+ {
+  "name": "14 Debug display shows why a catch fails",
+  "pass": true,
+  "detail": "CATCH  NG: 距離が遠い |   dist 16.39 / 3 m   angle 33 / 85° |   window -  cd -  buffer - |   last press: window   last miss: 距離が遠い | DISC   FLYING  speed 16.0  bounces 0 | GRAV   stable  k=0  angle 0.0°  next 30.0s | GOALS  cyan -x|-y  pink +x|-y | PLAYER ground([object Object])  airJumps 0  kicks 0"
+ },
+ {
+  "name": "15 Double jump; wall kick near a wall; one air action per airtime; wall kick follows the current gravity",
+  "pass": false,
+  "detail": "{\"j1\": 1, \"j2\": 2, \"j3\": false, \"kick\": \"kick\", \"kickVz\": -12, \"kickVup\": 7.83, \"after\": false, \"k1\": {\"kick\": \"kick\", \"up\": [-1, 0, 0], \"away\": 12, \"alongUp\": 1.8}}"
+ },
+ {
+  "name": "16 Gravity shift every 30 s: 2 s warning, 90 deg in 6 s, 1 s settle, constant gravity strength",
+  "pass": true,
+  "detail": "{\"evs\": [{\"t\": 28.01, \"type\": \"GRAVITY_SHIFT_WARNING\", \"in\": 1.9916666666676157}, {\"t\": 30.01, \"type\": \"GRAVITY_SHIFT_STARTED\", \"k\": 0}, {\"t\": 36.01, \"type\": \"GRAVITY_SHIFT_COMPLETED\", \"k\": 1}, {\"t\": 58.01, \"type\": \"GRAVITY_SHIFT_WARNING\", \"in\": 1.9916666666693175}, {\"t\": 60.01, \"type\": \"GRAVITY_SHIFT_STARTED\", \"k\": 1}, {\"t\": 66.01, \"type\": \"GRAVITY_SHIFT_COMPLETED\", \"k\": 2}, {\"t\": 88, \"type\": \"GRAVITY_SHIFT_WARNING\", \"in\": 1.999999999983899}, {\"t\": 90, \"type\": \"GRAVITY_SHIFT_STARTED\", \"k\": 2}], \"counts\": [{\"t\": 28.01, \"type\": \"GRAVITY_SHIFT_COUNT\", \"sec\": 2}, {\"t\": 29.01, \"type\": \"GRAVITY_SHI"
+ },
+ {
+  "name": "17 After a shift the old right wall is the floor (player, disc), jump goes along the new up",
+  "pass": true,
+  "detail": "{\"k\": 1, \"phase\": \"stable\", \"up\": [-1, 0, 0], \"grounded\": true, \"face\": \"px\", \"feetHeight\": 0, \"discState\": \"LOOSE\", \"discHeight\": 0.38, \"jumpAlongUp\": 10.87, \"jumpSide\": 0, \"landedFace\": \"px\"}"
+ },
+ {
+  "name": "18 Player can steer during the rotation; camera stays smooth (no snaps), finite and inside the room",
+  "pass": true,
+  "detail": "{\"moved\": 12.17, \"dz\": 12.17, \"camMaxDegPerStep\": 0, \"nan\": false, \"camOutside\": 0, \"groundedFramesDuringTurn\": 598}"
+ },
+ {
+  "name": "19 Panel visuals = panel collision (position, angle, size, bounce point); fixed, asymmetric",
+  "pass": true,
+  "detail": "{\"panels\": [{\"id\": \"C1\", \"dp\": 0, \"dq\": 0, \"size\": [2.56, 1.44, 0.16], \"half2\": [2.56, 1.44, 0.16]}, {\"id\": \"C2\", \"dp\": 0, \"dq\": 0, \"size\": [2.72, 1.28, 0.16], \"half2\": [2.72, 1.28, 0.16]}, {\"id\": \"C3\", \"dp\": 0, \"dq\": 0, \"size\": [1.28, 0.96, 0.16], \"half2\": [1.28, 0.96, 0.16]}, {\"id\": \"K1\", \"dp\": 0, \"dq\": 0, \"size\": [2.24, 1.44, 0.16], \"half2\": [2.24, 1.44, 0.16]}, {\"id\": \"K2\", \"dp\": 0, \"dq\": 0, \"size\": [3.68, 1.12, 0.16], \"half2\": [3.68, 1.12, 0.16]}, {\"id\": \"K3\", \"dp\": 0, \"dq\": 0, \"size\": [0.72, 2.4, 0.16], \"half2\": [0.72, 2.4, 0.16]}], \"hitAt\": {\"surface\": \"C2\", \"dist\": 0.46}, \"expect\": 0.46}"
+ },
+ {
+  "name": "20 Four goal faces: active pair = world-left (CYAN) / world-right (PINK) of the current floor, 2.0 m up; inactive mouths never score; keepers move with them",
+  "pass": false,
+  "detail": "[{\"k\": 0, \"cyan\": \"-x|-y\", \"pink\": \"+x|-y\", \"cyanWorldX\": -1, \"pinkWorldX\": 1, \"hCyan\": 1.4, \"hPink\": 1.4, \"goal\": {\"mouth\": \"+x|-y\", \"value\": 1}, \"inactive\": \"+x|+y\", \"inactiveGoal\": false, \"keepers\": [{\"team\": \"cyan\", \"mouth\": \"-x|-y\", \"feet\": 0}, {\"team\": \"pink\", \"mouth\": \"+x|-y\", \"feet\": 0}]}, {\"k\": 1, \"cyan\": \"-y|+x\", \"pink\": \"+y|+x\", \"cyanWorldX\": -1, \"pinkWorldX\": 1, \"hCyan\": 1.4, \"hPink\": 1.4, \"goal\": {\"mouth\": \"-y|+x\", \"value\": 2}, \"inactive\": \"+y|-x\", \"inactiveGoal\": false, \"keepers\": [{\"team\": \"cyan\", \"mouth\": \"-y|+x\", \"feet\": 0}, {\"team\": \"pink\", \"mouth\": \"+y|+x\", \"feet\": 0}]}, {\"k\": 2, \"cyan\": \"+x|+y\", \"pink\": \"-x|+y\", \"cyanWorldX\": -1, \"pinkWorldX\": 1, \"hCyan\": 1.4, \"hPink\": 1.4, \"goal\": null, \"inactive\": \"-x|-y\", \"inactiveGoal\": false, \"keepers\": [{\"team\": \"cyan\", \"mouth\": \"+x|+y\", \"feet\": -0.0}, {\"team\": \"pink\", \"mouth\": \"-x|+y\", \"feet\": 0}]}, {\"k\": 3, \"cyan\": \"+y|-x\", \"p"
+ },
+ {
+  "name": "21 During the rotation the previous goals stay active; the new pair takes over when it completes",
+  "pass": true,
+  "detail": "{\"phase\": \"rotating\", \"activeDuring\": \"+x|-y\", \"goalDuring\": \"+x|-y\", \"activeAfter\": \"+y|+x\", \"k\": 1}"
+ },
+ {
+  "name": "22 Keepers: left/right only, ignore the disc, 3D hitbox matches the model, cover part of the goal incl. the upper half (air shots)",
+  "pass": true,
+  "detail": "{\"lateralOnlyMaxOffAxis\": 0, \"zRange\": [-0.9, 0.9], \"notTracking\": true, \"joints\": {\"handL\": {\"hit\": \"armL\", \"outside\": false}, \"handR\": {\"hit\": \"armR\", \"outside\": false}, \"head\": {\"hit\": \"head\", \"outside\": false}, \"footL\": {\"hit\": \"legL\", \"outside\": false}, \"footR\": {\"hit\": \"legR\", \"outside\": false}, \"spine\": {\"hit\": \"body\", \"outside\": false}}, \"coverUpper\": 0.49, \"coverLower\": 0.44, \"keeperZ\": 0.9, \"reachTop\": 2.37, \"scale\": 1.25}"
+ },
+ {
+  "name": "23 Scoring: direct 1 point, one ricochet 2 points, two ricochets 3 points",
+  "pass": false,
+  "detail": "{\"direct\": {\"value\": 1, \"bounces\": [], \"score\": 1}, \"one\": {\"value\": 2, \"bounces\": [\"pz\"], \"score\": 2}, \"two\": {\"value\": 0, \"bounces\": [\"pz\", \"nz\", \"rim:+x|-y\", \"pz\", \"nx\"], \"score\": 0}}"
+ },
+ {
+  "name": "24 Half line blocks the player; anyone on the wrong side when a shift ends warps to their own half",
+  "pass": false,
+  "detail": "{\"maxX\": -0.4, \"gap\": 0.4, \"warped\": false, \"ownSide\": 5.54}"
+ },
+ {
+  "name": "25 Motion UI: catch / bounce / wall kick / block / goal / shift warning / GRAVITY SHIFT / NEW FLOOR / match end; one per slot; Enter skips; reduced motion",
+  "pass": true,
+  "detail": "{\"catch\": 1, \"bounce\": 1, \"kick\": 1, \"block\": 1, \"warnText\": \"ARENA SHIFT IN 2部屋が右に90°回転 → 右の壁が新しい床\", \"shift\": \"↻GRAVITY SHIFT\", \"goals\": 1, \"shiftAfterGoal\": 0, \"stageSlots\": 1, \"newFloor\": \"NEW FLOORゴールが切り替わった\", \"end\": \"YOU WIN!3 — 2\", \"afterEnter\": 0, \"rmClass\": true, \"anim\": \"fadeOut\", \"plain\": \"none\"}"
+ },
+ {
+  "name": "26 Crosshair 'catchable' state = the real catch test",
+  "pass": true,
+  "detail": "{\"agree\": 60, \"tot\": 60, \"seenOn\": true}"
+ },
+ {
+  "name": "27 Full 3-minute match vs CPU (v2.6.1: no rotation, unused goal mouths hidden; both sides shoot/catch/score, result screen)",
+  "pass": true,
+  "detail": "{\"state\": \"ended\", \"seconds\": 216.13, \"score\": {\"cyan\": 8, \"pink\": 11}, \"shifts\": 0, \"k\": 0, \"playerShots\": 39, \"catches\": 18, \"cpuShots\": 35, \"cpuGoals\": 7, \"goals\": 8, \"wallKicks\": 0, \"warps\": 0, \"nan\": 0, \"outside\": 0, \"capsuleMaxPenetration\": 0, \"worst\": null, \"discOutside\": 0, \"cpuHalfGap\": 0.51, \"events\": {\"DISC_THROWN\": 74, \"DISC_BOUNCED\": 42, \"GOAL_SCORED\": 15, \"DISC_CAUGHT\": 44, \"GOAL_SAVED\": 15, \"MATCH_FINISHED\": 1}, \"shiftOn\": false, \"hiddenMouths\": 6, \"result\": \"shown\"}"
+ },
+ {
+  "name": "28 Render budget (draw calls / triangles of the last pass)",
+  "pass": true,
+  "detail": "{\"calls\": 71, \"triangles\": 8302}"
+ },
+ {
+  "name": "29 No JavaScript errors during the whole desktop session",
+  "pass": true,
+  "detail": "[]"
+ },
+ {
+  "name": "30 Mobile landscape: touch UI, joystick, jump, CATCH button (glows when catchable), shoot, look, tap-to-skip, pause",
+  "pass": true,
+  "detail": "isTouch=True, state=playing, buttons=True, stick dx=3.28 m, jump=True, catch glow=True, catch=True, shoot->FLYING, look=-0.330, overlaps={'scoreOverlap': False, 'crossOverlap': False}, tap skip left=0, II->paused, resume->playing, errors=[]"
+ },
+ {
+  "name": "31 Runs from file:// (offline, no server)",
+  "pass": true,
+  "detail": "state=playing, errors=[]"
+ }
+]

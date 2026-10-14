@@ -1,0 +1,11 @@
+{
+  "result": {
+    "isTouch": true,
+    "speed": 22.4,
+    "state": "FLYING",
+    "overlap": false,
+    "curve": -1,
+    "offline": true
+  },
+  "errors": []
+}

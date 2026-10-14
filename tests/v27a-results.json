@@ -1,0 +1,117 @@
+{
+  "results": [
+    {
+      "name": "stage dimensions and wall kick",
+      "pass": true
+    },
+    {
+      "name": "just boundary -0.151",
+      "pass": true
+    },
+    {
+      "name": "just boundary -0.15",
+      "pass": true
+    },
+    {
+      "name": "just boundary 0",
+      "pass": true
+    },
+    {
+      "name": "just boundary 0.15",
+      "pass": true
+    },
+    {
+      "name": "just boundary 0.151",
+      "pass": true
+    },
+    {
+      "name": "counter speed 0",
+      "pass": true
+    },
+    {
+      "name": "immediate throw state 0",
+      "pass": true
+    },
+    {
+      "name": "counter speed 0.6",
+      "pass": true
+    },
+    {
+      "name": "immediate throw state 0.6",
+      "pass": true
+    },
+    {
+      "name": "counter speed 0.601",
+      "pass": true
+    },
+    {
+      "name": "immediate throw state 0.601",
+      "pass": true
+    },
+    {
+      "name": "same-step shoot buffer",
+      "pass": true
+    },
+    {
+      "name": "normal catch no bonus",
+      "pass": true
+    },
+    {
+      "name": "actual catch button",
+      "pass": true
+    },
+    {
+      "name": "counter HUD",
+      "pass": true
+    },
+    {
+      "name": "dash display blocked",
+      "pass": true
+    },
+    {
+      "name": "occlusion rejects catch",
+      "pass": true
+    },
+    {
+      "name": "old flight cannot late rescue",
+      "pass": true
+    },
+    {
+      "name": "normal peripheral catch improved",
+      "pass": true
+    },
+    {
+      "name": "early normal catch window",
+      "pass": true
+    },
+    {
+      "name": "real input catch and buffered counter",
+      "pass": true
+    },
+    {
+      "name": "scoring direct",
+      "pass": true
+    },
+    {
+      "name": "scoring one",
+      "pass": true
+    },
+    {
+      "name": "scoring two",
+      "pass": true
+    },
+    {
+      "name": "late rescue during active window",
+      "pass": true
+    },
+    {
+      "name": "expired rescue rejected",
+      "pass": true
+    },
+    {
+      "name": "CPU match simulation",
+      "pass": true
+    }
+  ],
+  "errors": []
+}

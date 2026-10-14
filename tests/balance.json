@@ -1,0 +1,123 @@
+{
+ "ground_direct": {
+  "n": 20,
+  "success": 12,
+  "saved": 8,
+  "values": [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "phases": {
+   "ground": 20
+  },
+  "meanSpread": 0
+ },
+ "air_direct": {
+  "n": 20,
+  "success": 7,
+  "saved": 10,
+  "values": [
+   1,
+   1,
+   3,
+   1,
+   1,
+   1,
+   1
+  ],
+  "phases": {
+   "apex": 10,
+   "rising": 6,
+   "falling": 4
+  },
+  "meanSpread": 0.88
+ },
+ "ricochet_1": {
+  "n": 20,
+  "success": 9,
+  "saved": 8,
+  "values": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "phases": {
+   "ground": 20
+  },
+  "meanSpread": 0
+ },
+ "ricochet_2": {
+  "n": 20,
+  "success": 7,
+  "saved": 9,
+  "values": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "phases": {
+   "ground": 20
+  },
+  "meanSpread": 0
+ },
+ "after_wallkick": {
+  "n": 20,
+  "success": 6,
+  "saved": 8,
+  "values": [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "phases": {
+   "rising": 18,
+   "apex": 2
+  },
+  "meanSpread": 1.24
+ },
+ "catch_ground": {
+  "n": 20,
+  "success": 19,
+  "airborneCatches": 0,
+  "failures": {
+   "never in reach": 1
+  }
+ },
+ "catch_air": {
+  "n": 20,
+  "success": 15,
+  "airborneCatches": 15,
+  "failures": {
+   "never in reach": 5
+  }
+ },
+ "catch_during_shift": {
+  "n": 20,
+  "success": 20,
+  "airborneCatches": 17,
+  "failures": {}
+ }
+}
