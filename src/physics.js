@@ -14,8 +14,17 @@ const D2R = Math.PI / 180;
 export function buildPanelColliders() {
   return PANELS.map(p => {
     const q = new THREE.Quaternion().setFromEuler(new THREE.Euler((p.tiltX || 0) * D2R, (p.rotY || 0) * D2R, (p.rotZ || 0) * D2R, 'YXZ'));
-    return { id: p.id, team: p.team, center: new THREE.Vector3(...p.pos), q, qi: q.clone().invert(), half: new THREE.Vector3(p.size[0] / 2, p.size[1] / 2, p.size[2] / 2) };
+    return { id: p.id, team: p.team, definition: p, center: new THREE.Vector3(...p.pos), q, qi: q.clone().invert(), half: new THREE.Vector3(p.size[0] / 2, p.size[1] / 2, p.size[2] / 2) };
   });
+}
+
+export function panelPosition(p, time, out) {
+  out.set(...p.pos);
+  if(p.motion) out.z += p.motion.sign * p.motion.amplitude * Math.sin(time * Math.PI * 2 / p.motion.period);
+  return out;
+}
+export function updatePanelColliders(panels, time) {
+  for(const p of panels) if(p.definition) panelPosition(p.definition,time,p.center);
 }
 
 /** Segment (a->b) vs oriented box. True if it passes through the box (blocks catches through panels). */

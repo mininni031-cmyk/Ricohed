@@ -64,21 +64,21 @@ export class UIManager {
   }
   teamBanners() { this.matchIntro(); }
   catchSuccess(rescued, just = false) {
-    this.mg('center', `<div class="catchFx"><span class="ringA"></span><span class="ringB"></span><b>${just ? 'JUST CATCH!' : 'CATCH!'}</b>${rescued ? '<i>LATE SAVE</i>' : ''}</div>`, 'catch', 0.7);
+    this.mg('center', `<div class="catchFx"><span class="ringA"></span><span class="ringB"></span><b>${just ? 'JUST CATCH!' : 'CATCH!'}</b>${rescued ? '<i>LATE SAVE</i>' : ''}</div>`, 'catch', 0.45);
   }
   bounceCount(count, value, rim) {
     if (rim) { this.mg('pop', '<b class="rim">RIM!</b>', 'bounce', 0.6); return; }
     const v = Math.min(3, value);
-    this.mg('pop', `<b class="v${v}">${count === 1 ? 'RICOCHET' : count === 2 ? 'DOUBLE' : 'x' + count}</b><i>SHOT VALUE x${v}</i>`, 'bounce', 0.75);
+    this.mg('pop', `<b class="v${v}">${count === 1 ? 'RICOCHET' : count === 2 ? 'DOUBLE' : 'x' + count}</b><i>SHOT VALUE x${v}</i>`, 'bounce', 0.45);
   }
   wallKick() { this.mg('side', '<b>WALL KICK</b>', 'kick', 0.6); }
   block(team) {
     const who = team === 'cyan' ? 'CYAN KEEPER' : 'PINK KEEPER';
-    this.mg('center', `<div class="blockFx ${team}"><b>BLOCK!</b><i>${who}</i></div>`, 'block', 0.9);
+    this.mg('center', `<div class="blockFx ${team}"><b>BLOCK!</b><i>${who}</i></div>`, 'block', 0.45);
   }
   goal(team, value, bounces, own) {
     const sub = own ? 'OWN GOAL' : value >= 3 ? 'DOUBLE RICOCHET' : value === 2 ? 'RICOCHET' : 'DIRECT';
-    this.mg('stage', `<div class="goalFx ${team}"><div class="stripe"></div><b>GOAL</b><i>${TEAMNAME[team]} +${value} ・ ${sub}</i></div>`, 'goal', 1.6);
+    this.mg('stage', `<div class="goalFx ${team}"><div class="stripe"></div><b>GOAL</b><i>${TEAMNAME[team]} +${value} ・ ${sub}</i></div>`, 'goal', 0.9);
   }
   shiftWarning(sec) {
     if (sec <= 0) return;
@@ -164,7 +164,7 @@ export class UIManager {
     const wallShot = !p.grounded && g.simTime <= p.wallShotUntil + 1e-9;
     this.set('chipAir', 'text', wallShot ? `WALL SHOT +10% ${Math.max(0, p.wallShotUntil - g.simTime).toFixed(2)}s` : p.grounded ? 'GROUND' : kickReady ? 'WALL KICK OK' : p.airJumps > 0 ? 'AIR ・ 2段目OK' : 'AIR');
     this.set('chipAir', 'class', p.grounded ? '' : kickReady ? 'on kick' : 'on');
-    this.set('curveGuide', 'text', p.holding && p.curve ? (p.curve < 0 ? '← 左カーブ' : '右カーブ →') + ' ｜ E 球種切替' : p.holding ? '直線 ｜ E 球種切替' : '');
+    this.set('curveGuide', 'text', p.holding && p.curve ? (p.curve < 0 ? '← 左カーブ' : '右カーブ →') + '' : p.holding ? '直線' : '');
     this.set('curveGuide', 'class', p.holding && p.curve ? 'selected' : '');
     this.set('tCurve', 'text', p.curve < 0 ? '← LEFT' : p.curve > 0 ? 'RIGHT →' : 'STRAIGHT');
     this.set('chipShot', 'text', `${p.curve === -1 ? 'CURVE LEFT' : p.curve === 1 ? 'CURVE RIGHT' : 'STRAIGHT'}${p.holding && p.chargeStart != null ? ' / CHARGE ' + Math.round(Math.min(1, (g.simTime - p.chargeStart) / CONFIG.CHARGE_TIME) * 100) + '%' : ''}`);

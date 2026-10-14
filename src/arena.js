@@ -6,6 +6,7 @@
 import {ellipseRingGeometry} from './goal-geometry.js';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import {panelPosition} from './physics.js';
 import { CONFIG, PANELS, TEAM, ROOM } from './config.js';
 import { toon, glowMat, canvasTexture } from './toon.js';
 import { paintFace } from './faces.js';
@@ -586,7 +587,7 @@ export class ArenaScene {
       bakeRigid(g);
       this.room.add(g);
       g.userData.panelId = p.id;
-      this.anim.panels.push({ id: p.id, mat, flash: 0, group: g });
+      this.anim.panels.push({ id: p.id, definition: p, mat, flash: 0, group: g });
     }
   }
 
@@ -650,7 +651,7 @@ export class ArenaScene {
       m.ringMat.color.copy(m.base).multiplyScalar(pulse + m.flash * 1.6);
       m.netMat.opacity = 0.55 + m.flash * 0.45;
     }
-    for (const p of this.anim.panels) { p.flash = Math.max(0, p.flash - dt * 3); p.mat.opacity = 0.8 + p.flash * 0.2; p.mat.color.setScalar(1 + p.flash * 1.5); }
+    for (const p of this.anim.panels) { panelPosition(p.definition,t,p.group.position); p.flash = Math.max(0, p.flash - dt * 3); p.mat.opacity = 0.8 + p.flash * 0.2; p.mat.color.setScalar(1 + p.flash * 1.5); }
     for (const m of Object.values(this.halfLines)) { const u = m.material.uniforms; u.uTime.value = t; u.uHit.value = Math.max(0, u.uHit.value - dt * 3); }
     const [fc, fp] = this.anim.lightsTeam;
     fc.intensity = 0.8 + (teamFlash.cyan || 0) * 3; fp.intensity = 0.7 + (teamFlash.pink || 0) * 3;

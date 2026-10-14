@@ -3,7 +3,7 @@ import {TrajectoryVolume} from './trajectory-volume.js';
 import {OnlineSession} from './online.js';
 import {shotParameters} from './shot.js';
 import {predictShot} from './prediction.js';
-import { segmentHitsOBB } from './physics.js';
+import { segmentHitsOBB, updatePanelColliders } from './physics.js';
 // Game (MatchState + glue): owns the match state machine, the fixed-step simulation and the
 // presentation. Simulation modules (ArenaGravitySystem, PlayerPhysics/Athlete, DiscPhysics,
 // CatchSystem, GoalSystem, Goalkeeper, CPUController) are pure logic in ROOM coordinates and never
@@ -154,7 +154,8 @@ export class Game {
     $('start').addEventListener('click', () => this.startMatch());
     $('resume').addEventListener('click', () => this.resume());
     $('restart').addEventListener('click', () => this.startMatch());
-    $('rematch').addEventListener('click', () => this.startMatch());
+    $('rematch').addEventListener('click', () => this.online?this.online.rematch():this.startMatch());
+    $('pauseToTitle').addEventListener('click',()=>{if(this.online)this.online.leave();this.input.enabled=false;this.input.exitLock();this.audio.stopMusic();this.state='title';this.showMenuMode('home');this.ui.menu('menuTitle');this.ui.showHUD(false);});
     $('toTitle').addEventListener('click', () => { if(this.online)this.online.leave();this.showMenuMode('home'); this.state = 'title'; this.ui.menu('menuTitle'); this.ui.showHUD(false); });
     $('btnPause').addEventListener('click', (e) => { e.stopPropagation(); this.pause(); });
     this.input.onFirstGesture = () => this.audio.unlock();
@@ -203,7 +204,7 @@ export class Game {
 
   resetMatch(countdown = true) {
     this.score.cyan = 0; this.score.pink = 0;
-    this.timeLeft = C.MATCH_TIME; this.matchClock = 0;
+    this.timeLeft = C.MATCH_TIME; this.matchClock = 0; this.simTime = 0; updatePanelColliders(this.disc.panels,0);
     this.stats = this.freshStats();
     this.gravity.reset(); this.gravity.endAt = C.MATCH_TIME; this.goals._k = null;
     this.rehomeKeepers(false);
@@ -236,7 +237,7 @@ export class Game {
     const online=mode==='online';document.getElementById('menuHome').hidden=online;document.getElementById('onlinePanel').hidden=!online;document.getElementById('menuExtras').hidden=online;this.input.keys.clear();this.input.clearPresses();if(online)document.getElementById('netRoom').focus();
   }
   startMatch() {
-    this.showMenuMode('home');
+    this.showMenuMode('home');document.getElementById('rematch').hidden=false;document.getElementById('rematch').disabled=false;document.getElementById('rematch').textContent='もう一度';document.getElementById('restart').hidden=false;
     if(this.online)this.online.leave();
     this.audio.unlock(); this.audio.play('ui');
     this.ui.menu(null); this.ui.showHUD(true);
@@ -303,7 +304,7 @@ export class Game {
   step(h) {
     if(this.online)return;
     if (this.state === 'paused' || this.state === 'title' || this.state === 'ended') return;
-    this.simTime += h;
+    this.simTime += h; updatePanelColliders(this.disc.panels,this.simTime);
     if (this.state === 'countdown') {
       this.countT += h;
       const c = this.countT;
@@ -733,7 +734,7 @@ export class Game {
     this.guideFrame=this.simTime;
     const eye=p.eye(),fwd=this.forward(new THREE.Vector3()),up=this.up(new THREE.Vector3());
     const origin=eye.clone().addScaledVector(fwd,.7).addScaledVector(this.flatRight(new THREE.Vector3()),.2).addScaledVector(up,-.15);
-    const result=predictShot({origin,direction:eye.clone().addScaledVector(fwd,40).sub(origin).normalize(),parameters:shotParameters(p,this.simTime),goals:this.goals,gravity:this.gravity,panels:this.disc.panels});
+    const result=predictShot({origin,direction:eye.clone().addScaledVector(fwd,40).sub(origin).normalize(),parameters:shotParameters(p,this.simTime),goals:this.goals,gravity:this.gravity,panels:this.disc.panels,time:this.simTime});
     const colors=[];
     for(const count of result.bounces){const col=new THREE.Color(count?DISC_COLORS[Math.min(count,2)]:p.curve?0xffdc63:0x9effc3);colors.push(col.r,col.g,col.b);}
     this.shotGuide.geometry.dispose();this.shotGuide.geometry=new THREE.BufferGeometry().setFromPoints(result.points);this.shotGuide.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));

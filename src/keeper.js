@@ -62,7 +62,7 @@ export class Goalkeeper {
     f.up.copy(mouth.up);                       // = -floor normal
     f.front.copy(mouth.normal).negate();       // faces the field
     f.lat.crossVectors(f.up, f.front).normalize();
-    f.origin.copy(mouth.normal).multiplyScalar(L - C.KEEPER_DEPTH).addScaledVector(mouth.slot, L);
+    f.origin.copy(mouth.normal).multiplyScalar(L - C.KEEPER_DEPTH).addScaledVector(mouth.slot, L).addScaledVector(f.up,C.KEEPER_LIFT);
     if (animate) { this.guard = C.KEEPER_REHOME_GUARD; this.appear = 0; }
     this.place();
   }

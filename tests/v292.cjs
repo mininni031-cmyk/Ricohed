@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const load=require('./load.cjs');
+const {CATCH,CONFIG,evalCatch,THREE,buildPanelColliders,updatePanelColliders,MatchSimulation}=load(`export {CATCH,CONFIG} from './src/config.js'; export {evalCatch} from './src/catch.js'; import * as physics from './src/physics.js'; export const buildPanelColliders=physics.buildPanelColliders,updatePanelColliders=physics.updatePanelColliders; export {MatchSimulation} from './src/match-simulation.js'; export * as THREE from 'three';`);
+const eye=new THREE.Vector3(),aim=new THREE.Vector3(1,0,0);
+const discAt=(distance,angle=0)=>{const pos=new THREE.Vector3(Math.cos(angle)*distance,0,Math.sin(angle)*distance);return {state:'FLYING',pos,prevPos:pos.clone(),vel:pos.clone().negate()};};
+assert.equal(evalCatch(CATCH,eye,aim,discAt(2.5),[]).ok,false,'outside tighter reach');
+assert.equal(evalCatch(CATCH,eye,aim,discAt(2,60*Math.PI/180),[]).ok,false,'must face incoming disc');
+assert.equal(evalCatch(CATCH,eye,aim,discAt(2,40*Math.PI/180),[]).ok,true);
+assert.equal(CATCH.window,.6);assert.equal(CONFIG.GOAL_Y,2.3);assert.equal(CONFIG.GOAL_A,4);assert.equal(CONFIG.GOAL_B,1.25);
+const panels=buildPanelColliders(),fixed=panels[1].center.clone(),start=panels[0].center.clone();updatePanelColliders(panels,2);
+assert.ok(panels[0].center.distanceTo(start)>.5,'upper panel moves');assert.ok(panels[1].center.equals(fixed),'lower panel stays fixed');
+const a=new MatchSimulation(),b=new MatchSimulation();a.start();b.start();for(let i=0;i<600;i++){a.step(1/120);b.step(1/120);}assert.deepEqual(a.disc.panels.map(p=>p.center.toArray()),b.disc.panels.map(p=>p.center.toArray()));
+(async()=>{const {Rooms}=await import('../server/rooms.mjs');const rooms=new Rooms();const socket=()=>({readyState:1,bufferedAmount:0,messages:[],send(s){this.messages.push(JSON.parse(s));},close(){this.readyState=3;}});const x=socket(),y=socket();rooms.join(x,{room:'v292-room'});rooms.join(y,{room:'v292-room'});const r=x.room;r.status='ended';r.match.state='ended';r.match.score.cyan=3;r.finishedAt=Date.now();
+rooms.message(x,{type:'rematch'});assert.equal(r.status,'ended','one consent cannot restart');rooms.message(x,{type:'rematch'});assert.equal(r.status,'ended');rooms.message(y,{type:'rematch'});assert.equal(r.status,'active');assert.equal(r.match.state,'countdown');assert.deepEqual(r.match.score,{cyan:0,pink:0});assert.equal(r.round,2);assert.equal(r.finishedAt,null);assert.equal(x.room,r);rooms.message(x,{type:'leave'});assert.equal(r.status,'aborted');assert.equal(y.messages.at(-1).reason,'opponent-left');console.log('v292 tighter catch, unchanged goal size, moving panels, bilateral rematch and leave PASS');})().catch(e=>{console.error(e);process.exitCode=1;});

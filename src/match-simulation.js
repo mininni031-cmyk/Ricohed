@@ -3,7 +3,7 @@ import {CONFIG as C,ROOM,CATCH,AIR_SHOT_SPREAD} from './config.js';
 import {Athlete} from './athlete.js';
 import {ArenaGravitySystem} from './gravity.js';
 import {GoalSystem} from './goals.js';
-import {DiscPhysics,segmentHitsOBB} from './physics.js';
+import {DiscPhysics,segmentHitsOBB,updatePanelColliders} from './physics.js';
 import {KeeperPhysics} from './keeper-physics.js';
 import {evalCatch} from './catch.js';
 import {shotParameters} from './shot.js';
@@ -77,7 +77,7 @@ export class MatchSimulation {
   pickups(){let best=null,bestD=C.PICKUP_RADIUS;for(const team of teams){const a=this.athletes[team];if(a.dashTime>0||a.noPickup>0)continue;const rel=this.disc.pos.clone().sub(a.pos),height=rel.dot(a.up);if(height>1||height<-.5||this.disc.pos.dot(this.gravity.teamDir(team))<-C.HALF_LINE_PICKUP_REACH)continue;rel.addScaledVector(a.up,-height);const d=rel.length();if(d<bestD){best=team;bestD=d;}}if(best)this.giveDisc(best,false);}
   step(dt){
     if(this.state==='waiting'||this.state==='ended')return;
-    this.simTime+=dt;
+    this.simTime+=dt;updatePanelColliders(this.disc.panels,this.simTime);
     if(this.state==='countdown'){this.countT+=dt;if(this.countT>=2.1)this.state='playing';return;}
     if(this.state==='goal'){this.goalTimer-=dt;if(this.goalTimer<=0){this.resetPositions();this.state='playing';}return;}
     this.timeLeft=Math.max(0,this.timeLeft-dt);this.matchClock+=dt;if(!this.timeLeft){this.state='ended';this.clearInputs();this.emit('ended');return;}

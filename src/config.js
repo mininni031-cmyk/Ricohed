@@ -31,9 +31,9 @@ export const GRAVITY_SHIFT = {
 // v2.6 catch rules (same for ground and air). Distance: eye -> disc centre.
 // Tested along the disc's path between simulation sub-steps (no tunnelling).
 export const CATCH = {
-  range: 2.8,        // m
-  angleDeg: 80,      // max angle between the aim and the disc
-  window: 1.2,       // s after pressing CATCH
+  range: 2.3,        // m
+  angleDeg: 55,      // max angle between the aim and the disc
+  window: 0.6,       // s after pressing CATCH
   rescue: 0.25,      // s: a press up to 0.25 s AFTER the disc was catchable still catches it
   cooldown: 0.15,     // s after a window that caught nothing
   suctionTime: 0.1,  // s visual pull of the disc into the hand on success
@@ -41,7 +41,7 @@ export const CATCH = {
   counterWindow: 0.6,
   counterMultiplier: 1.15,
   shotBuffer: 0.15,
-  approachSlack: 3.0,// a disc flying away is only catchable when closer than this
+  approachSlack: 1.0,// a disc flying away is only catchable when closer than this
 };
 // The CPU has its own catch rules (reaction delay / skill on top, see CPU_PRESETS)
 export const CPU_CATCH = { range: 2.6, angleDeg: 60, window: 0.5, cooldown: 0.8 };
@@ -57,7 +57,7 @@ export const GOAL_SCALE = 1;
 
 export const CONFIG = {
   GOAL_SCALE,
-  VERSION: '2.9.1',
+  VERSION: '2.9.2',
   MATCH_TIME: 180,
   SIM_STEP: 1 / 120,          // fixed simulation step (deterministic, frame-rate independent)
 
@@ -105,7 +105,7 @@ export const CONFIG = {
   MAX_POINTS: 3,
 
   // Goals: 2.9 m x 2.9 m round mouth (scoring edge = opening edge, ring outside it bounces)
-  GOAL_Y: 2.0,
+  GOAL_Y: 2.3,
   GOAL_A: 4.0,
   GOAL_B: 1.25,                // low-ceiling trial: centre height above floor
   GOAL_SCORE_RADIUS: 4.0, // compatibility for CPU lateral aiming
@@ -113,6 +113,7 @@ export const CONFIG = {
   GOAL_VISUAL_RADIUS: 4.14,
 
   // Keepers: side-to-side only (along z), never track anything. Hitbox = their posed body.
+  KEEPER_LIFT: 0.3,
   KEEPER_DEPTH: 1.6,          // stands this far in front of its goal wall
   KEEPER_RANGE: 2.9,
   KEEPER_PERIOD: 3.4,
@@ -141,14 +142,14 @@ export function cpuCfg() { return CPU_PRESETS[CONFIG.CPU] || CPU_PRESETS.NORMAL;
 // rotY / tiltX in degrees. Left/right as seen by that team's player at orientation 0.
 export const PANEL_LAYOUT = {
   cyan: [ // concept: easy single ricochets
-    { id: 'C1', role: '上段左・45°', pos: [-6.0, -5.0, -4.2], size: [2.56, 1.44, 0.16], rotY: 45 },
-    { id: 'C2', role: '下段右・30°', pos: [-5.0, -7.6, 4.0], size: [2.72, 1.28, 0.16], rotY: -30 },
-    { id: 'C3', role: '中央寄り・短い補助', pos: [-2.4, -6.8, -1.6], size: [1.28, 0.96, 0.16], rotY: 20 },
+    { id: 'C1', role: '上段左・45°', pos: [-5.5, -5.8, -5.0], size: [2.56, 1.44, 0.16], rotY: 45, motion: { amplitude: 1.4, period: 8, sign: 1 } },
+    { id: 'C2', role: '左サイド反射', pos: [-5.5, -8.8, -5.0], size: [2.72, 1.28, 0.16], rotY: 20 },
+    { id: 'C3', role: '右サイド反射', pos: [-5.5, -8.8, 5.0], size: [2.72, 1.28, 0.16], rotY: -20 },
   ],
   pink: [ // concept: multi ricochets
-    { id: 'K1', role: '上段右・鋭角', pos: [5.5, -4.8, -4.2], size: [2.24, 1.44, 0.16], rotY: 68, tiltX: 12 },
-    { id: 'K2', role: '下段左・長め', pos: [5.6, -7.7, 4.4], size: [3.68, 1.12, 0.16], rotY: -12 },
-    { id: 'K3', role: '中央外側・縦向き補助', pos: [7.6, -5.5, -3.0], size: [0.72, 2.4, 0.16], rotY: 10 },
+    { id: 'K1', role: '上段右・鋭角', pos: [5.5, -5.8, 5.0], size: [2.56, 1.44, 0.16], rotY: -45, motion: { amplitude: 1.4, period: 8, sign: -1 } },
+    { id: 'K2', role: '右サイド反射', pos: [5.5, -8.8, 5.0], size: [2.72, 1.28, 0.16], rotY: 20 },
+    { id: 'K3', role: '左サイド反射', pos: [5.5, -8.8, -5.0], size: [2.72, 1.28, 0.16], rotY: -20 },
   ],
 };
 export const PANELS = Object.entries(PANEL_LAYOUT).flatMap(([team, list]) => list.map(p => ({ ...p, team })));
