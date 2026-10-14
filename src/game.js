@@ -1,3 +1,5 @@
+import {QUALITY_PROFILES,readQuality} from './quality.js';
+import {TrajectoryVolume} from './trajectory-volume.js';
 import {OnlineSession} from './online.js';
 import {shotParameters} from './shot.js';
 import {predictShot} from './prediction.js';
@@ -35,7 +37,7 @@ export class Game {
   constructor({ test = false, debug = false } = {}) {
     this.test = test; this.debug = debug || C.DEBUG_CATCH;
     this.isTouch = matchMedia('(pointer:coarse)').matches || (navigator.maxTouchPoints > 0 && !matchMedia('(pointer:fine)').matches);
-    this.quality = this.isTouch ? 'low' : 'high';
+    this.displayQuality=readQuality(this.isTouch);this.qualityProfile=QUALITY_PROFILES[this.displayQuality];this.quality=this.qualityProfile.arena;
     this.state = 'title';
     this.score = { cyan: 0, pink: 0 };
     this.timeLeft = C.MATCH_TIME; this.matchClock = 0; this.simTime = 0;
@@ -64,7 +66,7 @@ export class Game {
 
     this.arena = new ArenaScene(this.scene, this.quality);
     this.room = this.arena.room;
-    this.crowd = new Crowd(this.scene, this.arena.seats, this.quality === 'low' ? 0.4 : 1);
+    this.crowd = new Crowd(this.scene, this.arena.seats, this.qualityProfile.crowd);
     this.keepers = [new Goalkeeper('cyan', this.room, 0), new Goalkeeper('pink', this.room, Math.PI / 2)];
     this.disc = new DiscPhysics(this.keepers, this.goals, this.gravity);
     this.player = new Athlete('player', 'cyan'); this.player.yaw = -Math.PI / 2; this.player.pitch = 0;
@@ -77,7 +79,7 @@ export class Game {
     this.buildDisc();
     this.sparks = new Sparks(this.room); this.rings = new Rings(this.room); this.trail = new DiscTrail(this.room);
     this.shotGuide = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({length:25},()=>new THREE.Vector3())), new THREE.LineDashedMaterial({color:0xffffff, vertexColors:true, dashSize:0.22, gapSize:0.12, transparent:true, opacity:0.85, depthWrite:false}));
-    this.shotGuide.visible = false; this.room.add(this.shotGuide);
+    this.shotGuide.visible = false; this.shotGuide.material.visible=false; this.guideVolume=new TrajectoryVolume();this.shotGuide.add(this.guideVolume); this.room.add(this.shotGuide);
     this.sparks.setScale(innerHeight);
 
     this.audio = new AudioManager();
@@ -97,8 +99,8 @@ export class Game {
   freshStats() { return { shots: 0, goals: 0, points: { 1: 0, 2: 0, 3: 0 }, saves: 0, catches: 0, cpuShots: 0, cpuGoals: 0, bounces: 0, airShots: 0, wallKicks: 0, warps: 0, shifts: 0 }; }
 
   initRenderer() {
-    const r = this.renderer = new THREE.WebGLRenderer({ antialias: !this.isTouch, powerPreference: 'high-performance', preserveDrawingBuffer: this.test });
-    this.maxPR = Math.min(devicePixelRatio || 1, this.isTouch ? 1.5 : 2);
+    const r = this.renderer = new THREE.WebGLRenderer({ antialias: this.qualityProfile.antialias, powerPreference: 'high-performance', preserveDrawingBuffer: this.test });
+    this.maxPR = Math.min(devicePixelRatio || 1, this.qualityProfile.pixelCap);
     r.setPixelRatio(this.maxPR); r.setSize(innerWidth, innerHeight);
     r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05;
     document.body.prepend(r.domElement);
@@ -126,6 +128,8 @@ export class Game {
   bindUI() {
     const $ = (id) => document.getElementById(id);
     $('logo').style.backgroundImage = `url(${drawLogoCanvas(1024, 256, false).userData.canvas.toDataURL()})`;
+    $('optQuality').value=this.displayQuality; $('optQuality').onchange=e=>{try{localStorage.setItem('ricochet-quality',e.target.value);}catch{}const u=new URL(location.href);u.searchParams.set('quality',e.target.value);location.href=u.href;};
+    $('chooseOnline').onclick=()=>this.showMenuMode('online');$('onlineBack').onclick=()=>{if(this.online)this.online.leave();this.showMenuMode('home');};
     $('optCpu').value = C.CPU;
     $('optCpu').onchange = (e) => { C.CPU = e.target.value; };
     const optRM = $('optReduceMotion'), optCS = $('optComfort'), optDbg = $('optDebug');
@@ -145,13 +149,13 @@ export class Game {
     syncAudio();
     const storedUrl=(()=>{try{return localStorage.getItem('ricochet-server');}catch{return null;}})();
     $('netUrl').value=window.RICOCHET_SERVER_URL||storedUrl||(location.protocol==='https:'?'':'ws://localhost:3001/ws');
-    $('netJoin').onclick=()=>{if(this.online)this.online.leave();try{const room=$('netRoom').value.trim();if(room.length<4||room.length>48)throw Error('合言葉は4〜48文字で入力してください。');this.audio.unlock();this.online=new OnlineSession(this,{url:$('netUrl').value.trim(),room});try{localStorage.setItem('ricochet-server',this.online.url);}catch{}this.online.connect();}catch(e){$('netStatus').textContent=e.message;this.online=null;}};
+    $('netJoin').onclick=()=>{if(this.online)this.online.leave();this.showMenuMode('online');try{const room=$('netRoom').value.trim();if(room.length<4||room.length>48)throw Error('合言葉は4〜48文字で入力してください。');if(!$('netUrl').value.trim())throw Error('オンラインは準備中です。CPU戦で遊べます。');this.audio.unlock();this.online=new OnlineSession(this,{url:$('netUrl').value.trim(),room});try{localStorage.setItem('ricochet-server',this.online.url);}catch{}this.online.connect();}catch(e){$('netStatus').textContent=e.message;this.online=null;}};
     $('netReady').onclick=()=>this.online?.ready();$('netLeave').onclick=()=>this.online?.leave();$('netExit').onclick=()=>this.online?.leave();
     $('start').addEventListener('click', () => this.startMatch());
     $('resume').addEventListener('click', () => this.resume());
     $('restart').addEventListener('click', () => this.startMatch());
     $('rematch').addEventListener('click', () => this.startMatch());
-    $('toTitle').addEventListener('click', () => { if(this.online)this.online.leave(); this.state = 'title'; this.ui.menu('menuTitle'); this.ui.showHUD(false); });
+    $('toTitle').addEventListener('click', () => { if(this.online)this.online.leave();this.showMenuMode('home'); this.state = 'title'; this.ui.menu('menuTitle'); this.ui.showHUD(false); });
     $('btnPause').addEventListener('click', (e) => { e.stopPropagation(); this.pause(); });
     this.input.onFirstGesture = () => this.audio.unlock();
     this.input.onPauseKey = () => {
@@ -228,7 +232,11 @@ export class Game {
     this.player.justUntil = -99; this.player.catchPressT = -99; this.player.shotBufferedUntil = -99;
     this.cpuChar.setBase('idle'); this.cpuChar.setExpression('normal');
   }
+  showMenuMode(mode){
+    const online=mode==='online';document.getElementById('menuHome').hidden=online;document.getElementById('onlinePanel').hidden=!online;document.getElementById('menuExtras').hidden=online;this.input.keys.clear();this.input.clearPresses();if(online)document.getElementById('netRoom').focus();
+  }
   startMatch() {
+    this.showMenuMode('home');
     if(this.online)this.online.leave();
     this.audio.unlock(); this.audio.play('ui');
     this.ui.menu(null); this.ui.showHUD(true);
@@ -271,6 +279,9 @@ export class Game {
 
   // ---------------------------------------------------------------- main loop
   frame(t) {
+    const resting=(!this.online&&['title','paused','ended'].includes(this.state))||!!(this.online&&(!this.online.latest||this.online.latest.status==='waiting'||this.online.localPaused));
+    if(resting&&this.lastMenuFrame!=null&&t-this.lastMenuFrame<1000/this.qualityProfile.menuFps){this.last=t;requestAnimationFrame(tt=>this.frame(tt));return;}
+    if(resting)this.lastMenuFrame=t;
     const dtReal = Math.min(0.1, (t - this.last) / 1000); this.last = t;
     this.tick(dtReal); this.render(); this.adaptResolution(dtReal);
     requestAnimationFrame((tt) => this.frame(tt));
@@ -726,7 +737,7 @@ export class Game {
     const colors=[];
     for(const count of result.bounces){const col=new THREE.Color(count?DISC_COLORS[Math.min(count,2)]:p.curve?0xffdc63:0x9effc3);colors.push(col.r,col.g,col.b);}
     this.shotGuide.geometry.dispose();this.shotGuide.geometry=new THREE.BufferGeometry().setFromPoints(result.points);this.shotGuide.geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
-    this.shotGuide.geometry.setDrawRange(0,result.points.length);this.shotGuide.material.vertexColors=true;this.shotGuide.material.color.set(0xffffff);this.shotGuide.computeLineDistances();
+    this.shotGuide.geometry.setDrawRange(0,result.points.length);this.shotGuide.material.vertexColors=true;this.shotGuide.material.color.set(0xffffff);this.shotGuide.computeLineDistances();this.guideVolume.setPath(result.points,colors);
   }
 
   updateVisuals(dt, live) {

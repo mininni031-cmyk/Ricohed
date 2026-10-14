@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#060c1c">
-<title>RICOCHET v2.9.0</title>
+<title>RICOCHET | mininni</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -36,7 +36,7 @@
 
   <!-- Centre -->
   <div id="cross"><div class="ring"></div><div class="dotc"></div></div>
-  <div id="curveGuide"></div><div id="trajectoryLegend">点線＝予測（壁・固定パネル反射を含む） ／ 光の帯＝実軌跡<br>緑：直線・黄：カーブ・紫：1反射・橙：2反射以上<br>予測にはキーパー・相手のキャッチ・空中のばらつきを含みません</div>
+  <div id="curveGuide"></div><div id="trajectoryLegend">半透明の立体ガイド＝予測 ／ 光の帯＝実軌跡<br>緑：直線・黄：カーブ・紫：1反射・橙：2反射以上<br>予測にはキーパー・相手のキャッチ・空中のばらつきを含みません</div>
   <div id="catchPrompt">CATCH!</div>
   <div id="callout"><div id="calloutMain"></div><div id="calloutSub"></div></div>
   <div id="bounceChip"></div>
@@ -80,23 +80,33 @@
     <div class="kicker">ANIME ARENA // GAME FEST STAGE</div>
     <div id="logo"></div>
     <div id="menuTitle">
-      <p class="lead">横長楕円ゴール × 25°カーブ × ONLINE<br><b>DIRECT 1点 ・ RICOCHET 2点 ・ DOUBLE RICOCHET 3点</b></p>
-      <p class="small">CPU戦ではCYAN（あなた）のゴールは左、PINK（CPU）のゴールは右。<br>二段ジャンプ／壁際ならウォールキック。照準の輪が<b>緑</b>になればキャッチできる。受付開始の±0.15秒でジャストキャッチ、以後0.6秒以内の反撃は速度+15%。<b>ハーフラインより相手陣地には入れない</b>（ディスクだけが越えられる）。</p>
-      <div class="settings">
-        <label>モーション軽減（演出を簡略化） <input type="checkbox" id="optReduceMotion"></label>
-        <label>デバッグ表示（キャッチ失敗理由） <input type="checkbox" id="optDebug"></label>
-        <label>ゴール：4.0m × 2.5m・中心高2.0m / コート幅28m</label>
-        <label>CPU <select id="optCpu"><option value="EASY">EASY</option><option value="NORMAL" selected>NORMAL</option><option value="HARD">HARD</option></select></label>
-        <label>SOUND <span><button class="toggle" id="optBgm">BGM ON</button><button class="toggle" id="optSfx">SE ON</button></span></label>
+      <div id="menuHome">
+        <p class="lead">狙って、曲げて、跳ね返せ。</p>
+        <p class="menuSub">3分間のディスクスポーツ</p>
+        <div class="modeChoices">
+          <button id="start" class="primary">CPU戦<span>ひとりですぐに遊ぶ</span></button>
+          <button id="chooseOnline" class="primary">オンライン対戦<span>合言葉で友達と1対1</span></button>
+        </div>
+        <p class="scoreRule">直接 <b>1点</b> · 1反射 <b>2点</b> · 2反射以上 <b>3点</b></p>
       </div>
-      <button id="start" class="primary">CPU戦を開始</button>
-      <div id="onlinePanel"><h3>ONLINE 1v1</h3>
-        <label>対戦サーバー <input id="netUrl" type="url" placeholder="wss://your-service.onrender.com/ws" autocomplete="off"></label>
-        <label>合言葉 <input id="netRoom" maxlength="48" placeholder="友達と同じ4〜48文字" autocomplete="off"></label>
-        <div class="netButtons"><button id="netJoin">入室</button><button id="netReady" hidden>準備完了</button><button id="netLeave" hidden>退出</button></div>
-        <p id="netStatus" aria-live="polite">同じ合言葉で2人が入室すると対戦できます。</p>
+      <div id="onlinePanel" hidden>
+        <button id="onlineBack" class="backBtn">← 戻る</button><h3>友達と対戦</h3>
+        <p class="menuSub">同じ合言葉で入室し、双方が準備完了にすると開始します。</p>
+        <label>合言葉 <input id="netRoom" maxlength="48" placeholder="例：りこしぇ友達" autocomplete="off"></label>
+        <div class="netButtons"><button id="netJoin">入室する</button><button id="netReady" hidden>準備完了</button><button id="netLeave" hidden>退出</button></div>
+        <p id="netStatus" aria-live="polite">友達と決めた4〜48文字を入力してください。</p>
+        <details id="connectionSettings"><summary>接続設定（管理用）</summary><label>接続先 <input id="netUrl" type="url" placeholder="接続先を設定" autocomplete="off"></label></details>
       </div>
-      <p class="tiny">壁キック後0.8秒以内の空中ショットは速度+10%・精度UP<br>E 球種切替（直線→左→右） / Q長押し→離してチャージ射撃 / Z 左・X 右・C 直線<br>PC: WASD / マウス / 左クリック シュート / 右クリック/F キャッチ / Shift / Space / Esc<br>スマホ: 横画面推奨 — 左スティック移動、右側ドラッグで視点</p>
+      <div id="menuExtras">
+        <details class="menuDetails"><summary>遊び方・操作</summary><p class="small">WASDで移動、マウスで視点。左クリックで投げ、F／右クリックでキャッチ。Eで直線・左カーブ・右カーブを切り替え。<br>Q長押し→離すとチャージ、Spaceでジャンプ／壁キック、Shiftでダッシュ。スマホは横画面で画面ボタンを使います。<br>ハーフラインは越えられません。キャッチ直後の反撃と、壁キック後の空中投球は強化されます。</p></details>
+        <details class="menuDetails"><summary>設定</summary><div class="settings">
+          <label>画質 <select id="optQuality"><option value="low">最軽量</option><option value="balanced">軽量（推奨）</option><option value="high">高画質</option></select></label>
+          <label>CPUの強さ <select id="optCpu"><option value="EASY">EASY</option><option value="NORMAL" selected>NORMAL</option><option value="HARD">HARD</option></select></label>
+          <label>演出を抑える <input type="checkbox" id="optReduceMotion"></label>
+          <label>音 <span><button class="toggle" id="optBgm">BGM ON</button><button class="toggle" id="optSfx">SE ON</button></span></label>
+          <details><summary>開発用</summary><label>判定表示 <input type="checkbox" id="optDebug"></label></details>
+        </div></details>
+      </div>
     </div>
     <div id="menuPause" class="hidden">
       <h2>PAUSED</h2>
@@ -113,7 +123,7 @@
       <button id="rematch" class="primary">もう一度</button>
       <button id="toTitle">タイトルへ</button>
     </div>
-    <p class="ver">RICOCHET v2.9.0 · CPU戦 / ONLINE 1v1 · 楕円4.0×2.5m / コート28m</p>
+    <p class="ver">RICOCHET v2.9.1 · CPU戦 / ONLINE 1v1 · 楕円8.0×2.5m / コート28m</p>
   </div>
 </div>
 <div id="rotate">横画面にしてプレイしてください<br><small>Rotate to landscape</small></div>

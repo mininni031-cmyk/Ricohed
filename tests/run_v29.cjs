@@ -39,10 +39,10 @@ setup();g.giveDisc('player',false);g.player.pos.set(-4,-8,__RICO.ROOM.W-.45);g.p
 setup();g.giveDisc('player',false);g.player.grounded=false;g.player.wallShotUntil=g.simTime+.8;g.player.justUntil=g.simTime+.6;g.playerShoot();check('wall plus just stack',Math.abs(g.disc.vel.length()-20.24)<1e-7);
 setup();g.player.grounded=false;g.player.pos.y=-__RICO.ROOM.L+.01;g.player.vel.set(0,-2,0);g.player.wallShotUntil=g.simTime+.8;run(10);check('landing cancels wall bonus',g.player.grounded&&g.player.wallShotUntil<g.simTime);
 
-check('goal opening width and height x1.5',R.CONFIG.GOAL_A===2&&R.CONFIG.GOAL_B===1.25&&R.CONFIG.GOAL_Y===2);
+check('goal opening width8 height2.5',R.CONFIG.GOAL_A===4&&R.CONFIG.GOAL_B===1.25&&R.CONFIG.GOAL_Y===2);
 check('clearer curve angle',Math.abs(R.CONFIG.CURVE_RATE*R.CONFIG.CURVE_TIME-25*Math.PI/180)<1e-9);
 setup();g.giveDisc('player',false);g.player.curve=-1;g.updateVisuals(0,true);check('visible curved direction guide',!!g.shotGuide?.visible);
-setup();g.giveDisc('player',false);g.player.curve=0;g.guideFrame=-99;g.updateShotGuide();check('straight prediction visible',g.shotGuide.visible&&g.shotGuide.geometry.drawRange.count>10);check('trajectory legend',document.getElementById('trajectoryLegend').textContent.includes('点線'));
+setup();g.giveDisc('player',false);g.player.curve=0;g.guideFrame=-99;g.updateShotGuide();check('straight prediction visible',g.shotGuide.visible&&g.shotGuide.geometry.drawRange.count>10);check('trajectory legend',document.getElementById('trajectoryLegend').textContent.includes('立体ガイド'));
 
 setup();g.player.curve=0;for(const expected of [-1,1,0]){TT.key('KeyE');run(1);check('E cycles to '+expected,g.player.curve===expected);check('E never catches '+expected,!g.player.holding&&g.player.catchWindow<=0);}g.giveDisc('player',false);g.ui.update(0,g);check('E controls in HUD',document.getElementById('curveGuide').textContent.includes('E'));
 setup();const e=g.player.eye();g.disc.pos.copy(e.clone().add(V(2.9,0,0)));g.disc.prevPos.copy(g.disc.pos);check('2.9m now outside',!g.catchEval('player').ok);g.disc.pos.copy(e.clone().add(V(2.7,0,0)));g.disc.prevPos.copy(g.disc.pos);check('2.7m stays catchable',g.catchEval('player').ok);

@@ -213,7 +213,7 @@ export class ArenaScene {
     const beamMatC = new THREE.MeshBasicMaterial({ color: 0x35e8ff, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     const beamMatP = beamMatC.clone(); beamMatP.color.set(0xff4fa3);
     const beamMatW = beamMatC.clone(); beamMatW.color.set(0xbfe8ff); beamMatW.opacity = 0.035;
-    for (const [x, y, z, m] of [[-24, 42, -24, beamMatC], [24, 42, -24, beamMatP], [-24, 42, 24, beamMatC], [24, 42, 24, beamMatP], [-8, 43, -28, beamMatW], [8, 43, 28, beamMatW], [-36, 40, 0, beamMatC], [36, 40, 0, beamMatP]]) {
+    for (const [x, y, z, m] of [[-24, 42, -24, beamMatC], [24, 42, -24, beamMatP], [-24, 42, 24, beamMatC], [24, 42, 24, beamMatP], [-8, 43, -28, beamMatW], [8, 43, 28, beamMatW], [-36, 40, 0, beamMatC], [36, 40, 0, beamMatP]].slice(0,this.quality==='low'?4:8)) {
       const b = new THREE.Mesh(beamGeo, m); b.position.set(x, y, z);
       b.rotation.set((Math.random() - 0.5) * 0.6, 0, (Math.random() - 0.5) * 0.6);
       this.root.add(b); this.anim.beams.push({ mesh: b, phase: Math.random() * 6, bx: b.rotation.x, bz: b.rotation.z });

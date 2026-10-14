@@ -42,7 +42,7 @@ RenderでGitHubリポジトリからWeb Serviceを作ります。Blueprintを利
 
 `ALLOWED_ORIGINS`はパスと末尾の`/`を含めません。複数ならカンマで区切ります。利用する独自ドメインも追加してください。CloudflareのプレビューURLを使う場合も、その実際のOriginを明示的に追加します。
 
-PORTはRenderが提供する値を使い、サーバーは0.0.0.0で待受します。公開後、`https://実際のサービス名.onrender.com/health`で`{"ok":true,"version":"2.9.0"}`が返ることを確認します。
+PORTはRenderが提供する値を使い、サーバーは0.0.0.0で待受します。公開後、`https://実際のサービス名.onrender.com/health`で`{"ok":true,"version":"2.9.1"}`が返ることを確認します。
 
 ゲーム画面からの接続先は`wss://実際のサービス名.onrender.com/ws`です。サービス名はRenderで発行されたURLを使い、例の名前をそのまま使わないでください。
 
@@ -88,3 +88,9 @@ Node.js 24を使います。依存導入が自動で実行されない環境で�
 - https://developers.cloudflare.com/pages/configuration/git-integration/
 - https://render.com/docs/websocket
 - https://render.com/docs/web-services
+
+## このサイトの接続先
+
+現在のゲーム： https://mininni-games.com/games/ricochet/
+Render： https://ricochet-ws.onrender.com/
+公開ゲームのOrigin許可は `https://mininni-games.com` です（/games/ricochet/ は含めません）。Cloudflareサイトに複数ゲームがあるため、更新は games/ricochet/ のファイルのみ置き換えてください。

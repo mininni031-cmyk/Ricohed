@@ -1,6 +1,6 @@
 {
   "name": "ricochet",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "private": true,
   "description": "RICOCHET ellipse-goal disc sport, offline CPU and authoritative online 1v1",
   "scripts": {

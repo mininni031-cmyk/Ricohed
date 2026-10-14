@@ -57,7 +57,7 @@ export const GOAL_SCALE = 1;
 
 export const CONFIG = {
   GOAL_SCALE,
-  VERSION: '2.9.0',
+  VERSION: '2.9.1',
   MATCH_TIME: 180,
   SIM_STEP: 1 / 120,          // fixed simulation step (deterministic, frame-rate independent)
 
@@ -106,15 +106,15 @@ export const CONFIG = {
 
   // Goals: 2.9 m x 2.9 m round mouth (scoring edge = opening edge, ring outside it bounces)
   GOAL_Y: 2.0,
-  GOAL_A: 2.0,
+  GOAL_A: 4.0,
   GOAL_B: 1.25,                // low-ceiling trial: centre height above floor
-  GOAL_SCORE_RADIUS: 2.0, // compatibility for CPU lateral aiming
+  GOAL_SCORE_RADIUS: 4.0, // compatibility for CPU lateral aiming
   GOAL_RING_TUBE: 0.14,
-  GOAL_VISUAL_RADIUS: 2.14,
+  GOAL_VISUAL_RADIUS: 4.14,
 
   // Keepers: side-to-side only (along z), never track anything. Hitbox = their posed body.
   KEEPER_DEPTH: 1.6,          // stands this far in front of its goal wall
-  KEEPER_RANGE: 1.45,
+  KEEPER_RANGE: 2.9,
   KEEPER_PERIOD: 3.4,
   KEEPER_SCALE: 1.25,         // keepers are big (2.3 m); raised hands reach ~2.6 m and guard the upper middle
   KEEPER_SAVE_SPEED_KEEP: 0.55,

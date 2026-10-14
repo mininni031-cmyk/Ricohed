@@ -16,7 +16,7 @@ export class OnlineSession {
       else if(m.type==='pong')this.latency=Math.max(0,Math.round(performance.now()-m.sent));
       else if(m.type==='error'){this.status(errors[m.code]||'接続に失敗しました。');if(['full','room','expired','ended','capacity','join-first'].includes(m.code)){if(this.token&&this.latest)this.failRecovery(errors[m.code]||'試合が中断されました。');else{this.intentional=true;this.connected=false;ws.close();}document.getElementById('netJoin').disabled=false;}}
     };
-    ws.onerror=()=>{if(!this.token)this.status('接続できません。サーバーURL・起動状態・接続許可設定を確認してください。');};
+    ws.onerror=()=>{if(!this.token)this.status('オンラインに接続できませんでした。少し待ってから入室し直してください。');};
     ws.onclose=()=>{clearTimeout(timeout);this.connected=false;this.g.input.enabled=false;this.clearControls();if(this.intentional)return;
       if(this.token){this.disconnectAt??=Date.now();if(Date.now()-this.disconnectAt<30000){this.status('通信が切れました。30秒以内の復帰を試みています…');this.retry=setTimeout(()=>this.connect(),1000);return;}}
       if(this.token&&this.latest)this.failRecovery('30秒以内に再接続できなかったため、試合を中断しました。');else this.status('接続できませんでした。退出して再度入室してください。');document.getElementById('netJoin').disabled=false;
@@ -29,7 +29,7 @@ export class OnlineSession {
   pause(){this.localPaused=true;this.clearControls();this.g.input.enabled=false;this.g.input.exitLock();this.g.ui.menu('menuPause');this.status('操作を停止中です。オンラインの試合時間は進みます。');}
   resume(){this.localPaused=false;this.g.ui.menu(null);this.g.input.enabled=this.latest?.status==='active';this.g.input.requestLock();}
   leave(){
-    this.intentional=true;clearTimeout(this.retry);this.send({type:'leave'});this.socket?.close();this.g.online=null;this.clearControls();this.g.input.enabled=false;this.g.input.exitLock();this.g.player.team='cyan';this.g.cpuA.team='pink';this.g.resetMatch(false);this.g.ui.menu('menuTitle');this.g.ui.showHUD(false);this.g.ui.cache.clear();
+    this.intentional=true;clearTimeout(this.retry);this.send({type:'leave'});this.socket?.close();this.g.online=null;this.clearControls();this.g.input.enabled=false;this.g.input.exitLock();this.g.player.team='cyan';this.g.cpuA.team='pink';this.g.resetMatch(false);this.g.ui.menu('menuTitle');this.g.ui.showHUD(false);this.g.ui.cache.clear();this.g.showMenuMode('home');
     document.getElementById('netJoin').disabled=false;document.getElementById('netReady').hidden=true;document.getElementById('netReady').disabled=false;document.getElementById('netLeave').hidden=true;document.getElementById('netHud').hidden=true;document.getElementById('netExit').hidden=true;
     document.querySelector('.team.cyan .tsub').textContent='YOU';document.querySelector('.team.pink .tsub').textContent='CPU';document.querySelector('#playerCard .pname span').textContent='TEAM CYAN';this.status('退出しました。新しい合言葉で入室できます。');
   }

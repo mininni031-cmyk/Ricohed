@@ -1,0 +1,3 @@
+Error: server URL exposed on title; online mode choice missing; goal is not 8x2.5 at center2; keeper does not fit new width; default draw load excessive
+    at <project>\tests\ui-lightwide.cjs:9:27
+

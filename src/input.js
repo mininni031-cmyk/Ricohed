@@ -24,10 +24,11 @@ export class Input {
     const gesture = () => this.onFirstGesture && this.onFirstGesture();
     this.on(document, 'keydown', (e) => {
       gesture();
+      if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||e.target instanceof HTMLTextAreaElement||e.target.isContentEditable)return;
       if (e.code === 'Escape') { if (this.onPauseKey) this.onPauseKey(); return; }
       if (['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
       if (e.repeat) return;
-      this.keys.add(e.code);
+      if(this.enabled)this.keys.add(e.code);
       if (e.code === 'KeyQ') this.press('chargeStart');
       if (e.code === 'KeyZ') this.press('curveLeft');
       if (e.code === 'KeyX') this.press('curveRight');
