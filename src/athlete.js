@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { CONFIG, WALL_KICK, ROOM, GRAVITY_SHIFT } from './config.js';
 
 const C = CONFIG;
+const ROOF_CONTACT = 0.05; // m: head this close to the roof counts as touching it
 // The six room faces as INWARD normals with their plane offset (inside: n.p >= -h)
 export const ROOM_FACES = [
   { id: 'px', n: new THREE.Vector3(-1, 0, 0), h: ROOM.L }, { id: 'nx', n: new THREE.Vector3(1, 0, 0), h: ROOM.L },
@@ -61,12 +62,18 @@ export class Athlete {
       return 1;
     }
     if (this.airJumps > 0) {
+      // Head already against the low roof: an upward impulse would be cancelled at once,
+      // so keep the air action instead of wasting it.
+      if (this.touchingRoof()) return false;
       const wall = this.nearestKickWall(goals);
       if (wall && this.wallKicks < WALL_KICK.maxUsesPerJump) { this.wallKick(wall); this.airJumps = 0; return 'kick'; }
       this.airJumps = 0; this.vy = C.DOUBLE_JUMP_VELOCITY; return 2;
     }
     return false;
   }
+
+  /** True when the top of the body is at the roof (normal gravity only; the room never turns). */
+  touchingRoof() { return this.up.y > 0.999 && this.pos.y + C.PLAYER_HEIGHT >= ROOM.CEILING_Y - ROOF_CONTACT; }
 
   /** Capsule axis ends (lower, upper). */
   axis(a = _a, b = _b) { a.copy(this.pos).addScaledVector(this.up, C.PLAYER_RADIUS); b.copy(this.pos).addScaledVector(this.up, C.PLAYER_HEIGHT - C.PLAYER_RADIUS); return [a, b]; }
@@ -190,8 +197,15 @@ export class Athlete {
       const pen = C.PLAYER_RADIUS - (Math.min(f.n.dot(a), f.n.dot(b)) + f.h);
       if (pen > 0) { this.pos.addScaledVector(f.n, pen); const vn = this.vel.dot(f.n); if (vn < 0) this.vel.addScaledVector(f.n, -vn); }
     }
+    // low roof (6.8 m): the head may never end a step above it, and no upward speed survives contact
+    if (this.up.y > 0.999) {
+      const maxFeetY = ROOM.CEILING_Y - C.PLAYER_HEIGHT;
+      if (this.pos.y > maxFeetY) this.pos.y = maxFeetY;
+      if (this.pos.y >= maxFeetY - 1e-6 && this.vel.y > 0) this.vel.y = 0;
+    }
     return ev;
   }
 
   snapshot() { return { pos: this.pos.toArray(), vel: this.vel.toArray(), grounded: this.grounded, airJumps: this.airJumps, wallKicks: this.wallKicks, holding: this.holding }; }
 }
+

@@ -8,7 +8,7 @@ const m = {exports:{}};new Function('module','exports','require',code)(m,m.expor
 const R=m.exports,V=(x,y,z)=>new R.THREE.Vector3(x,y,z),c=R.CONFIG;
 let count=0; const test=(name,f)=>{try{f();count++;console.log('PASS '+name);}catch(e){console.error('FAIL '+name+': '+e.message);process.exitCode=1;}};
 function shoot(z,dy,speed=16,bounces=0){const g=new R.ArenaGravitySystem(()=>{}),goals=new R.GoalSystem(g),d=new R.DiscPhysics([],goals,g);d.panels=[];const mouth=goals.active().pink;d.launch(V(9,mouth.center.y+dy,z),V(1,0,0),'player',speed);d.bounces=bounces;const events=[];for(let i=0;i<300&&d.state==='FLYING'&&!events.some(e=>e.type==='bounce');i++)d.stepFlying(1/120,events);return {d,events};}
-test('stage width 28m and ceiling 10m',()=>{assert.equal(R.ROOM.W,14);assert.equal(R.ROOM.CEILING_Y+R.ROOM.L,10);});
+test('stage width 28m and ceiling 6.8m',()=>{assert.equal(R.ROOM.W,14);assert.equal(R.ROOM.CEILING_Y+R.ROOM.L,6.8);});
 test('goal center floor+2.3',()=>{assert.equal(c.GOAL_Y,2.3);});
 for(const [z,y] of [[0,0],[3.85,0],[0,1.15],[2.8,.7]])test('ellipse scores '+z+','+y,()=>assert.equal(shoot(z,y).events.find(e=>e.type==='goal')?.value,1));
 for(const [z,y] of [[0,1.3],[4.05,0],[3.6,.7]])test('ellipse rejects '+z+','+y,()=>assert.equal(shoot(z,y).events.some(e=>e.type==='goal'),false));

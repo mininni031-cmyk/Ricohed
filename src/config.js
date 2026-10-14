@@ -14,7 +14,7 @@ export const ROOM = {
   L: 11,             // half size in x and y  -> 22 m x 22 m cross-section
   W: 14,             // half size in z        -> 24 m wide (trial wider arena)
   CENTER_Y: 16,      // world height of the room centre (resting floor at world y = 5)
-  CEILING_Y: -1.0,   // floor y=-11 => 10.0 m clear height (v2.7A)
+  CEILING_Y: -4.2,   // floor y=-11 => 6.8 m clear height; tighter vertical play
 };
 
 // ARENA GRAVITY SHIFT: the room turns 90 deg "to the right" (clockwise in the reference view
@@ -31,10 +31,10 @@ export const GRAVITY_SHIFT = {
 // v2.6 catch rules (same for ground and air). Distance: eye -> disc centre.
 // Tested along the disc's path between simulation sub-steps (no tunnelling).
 export const CATCH = {
-  range: 2.3,        // m
-  angleDeg: 55,      // max angle between the aim and the disc
-  window: 0.6,       // s after pressing CATCH
-  rescue: 0.25,      // s: a press up to 0.25 s AFTER the disc was catchable still catches it
+  range: 3.10,       // m: slightly more forgiving player catches
+  angleDeg: 72,      // max angle between the aim and the disc
+  window: 0.90,      // s after pressing CATCH
+  rescue: 0.38,      // s: short late-catch grace period
   cooldown: 0.15,     // s after a window that caught nothing
   suctionTime: 0.1,  // s visual pull of the disc into the hand on success
   justWindow: 0.15, // seconds either side of entering the catch zone
@@ -57,7 +57,7 @@ export const GOAL_SCALE = 1;
 
 export const CONFIG = {
   GOAL_SCALE,
-  VERSION: '2.9.2',
+  VERSION: '2.9.3',
   MATCH_TIME: 180,
   SIM_STEP: 1 / 120,          // fixed simulation step (deterministic, frame-rate independent)
 
@@ -140,16 +140,18 @@ export function cpuCfg() { return CPU_PRESETS[CONFIG.CPU] || CPU_PRESETS.NORMAL;
 // Trick panels: FIXED in the room (v2.6). Positions are room-local. Because the room turns, each
 // panel is close to the floor for two of the four orientations and high above it for the others.
 // rotY / tiltX in degrees. Left/right as seen by that team's player at orientation 0.
+// Each panel is angled to offer an attacking ricochet toward its own team's goal.
+// Cyan goal at -X; pink goal at +X. Leave more lateral room between panels.
 export const PANEL_LAYOUT = {
-  cyan: [ // concept: easy single ricochets
-    { id: 'C1', role: '上段左・45°', pos: [-5.5, -5.8, -5.0], size: [2.56, 1.44, 0.16], rotY: 45, motion: { amplitude: 1.4, period: 8, sign: 1 } },
-    { id: 'C2', role: '左サイド反射', pos: [-5.5, -8.8, -5.0], size: [2.72, 1.28, 0.16], rotY: 20 },
-    { id: 'C3', role: '右サイド反射', pos: [-5.5, -8.8, 5.0], size: [2.72, 1.28, 0.16], rotY: -20 },
+  cyan: [
+    { id: 'C1', role: '左上・自陣ゴール反射', pos: [-5.5, -6.15, -8.5], size: [2.56, 1.44, 0.16], rotY: -42, motion: { amplitude: 1.0, period: 8, sign: 1 } },
+    { id: 'C2', role: '左サイド・自陣ゴール反射', pos: [-5.5, -8.85, -8.5], size: [2.72, 1.28, 0.16], rotY: -32 },
+    { id: 'C3', role: '右サイド・自陣ゴール反射', pos: [-5.5, -8.85, 8.5], size: [2.72, 1.28, 0.16], rotY: 32 },
   ],
-  pink: [ // concept: multi ricochets
-    { id: 'K1', role: '上段右・鋭角', pos: [5.5, -5.8, 5.0], size: [2.56, 1.44, 0.16], rotY: -45, motion: { amplitude: 1.4, period: 8, sign: -1 } },
-    { id: 'K2', role: '右サイド反射', pos: [5.5, -8.8, 5.0], size: [2.72, 1.28, 0.16], rotY: 20 },
-    { id: 'K3', role: '左サイド反射', pos: [5.5, -8.8, -5.0], size: [2.72, 1.28, 0.16], rotY: -20 },
+  pink: [
+    { id: 'K1', role: '右上・自陣ゴール反射', pos: [5.5, -6.15, 8.5], size: [2.56, 1.44, 0.16], rotY: -42, motion: { amplitude: 1.0, period: 8, sign: -1 } },
+    { id: 'K2', role: '右サイド・自陣ゴール反射', pos: [5.5, -8.85, 8.5], size: [2.72, 1.28, 0.16], rotY: -32 },
+    { id: 'K3', role: '左サイド・自陣ゴール反射', pos: [5.5, -8.85, -8.5], size: [2.72, 1.28, 0.16], rotY: 32 },
   ],
 };
 export const PANELS = Object.entries(PANEL_LAYOUT).flatMap(([team, list]) => list.map(p => ({ ...p, team })));

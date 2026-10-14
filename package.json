@@ -1,6 +1,6 @@
 {
   "name": "ricochet",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "private": true,
   "description": "RICOCHET ellipse-goal disc sport, offline CPU and authoritative online 1v1",
   "scripts": {
@@ -10,7 +10,8 @@
     "serve": "node server/dev.mjs",
     "test": "node tools/test.cjs",
     "test:core": "node tests/core.cjs && node tests/shot.cjs && node tests/match.cjs && node tests/online.cjs",
-    "test:package": "node tests/package.cjs"
+    "test:package": "node tests/package.cjs",
+    "test:ceiling": "node tests/ceiling-hotfix.cjs"
   },
   "dependencies": {
     "three": "0.180.0",
