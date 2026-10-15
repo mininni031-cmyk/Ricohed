@@ -5,7 +5,9 @@ const fs=require('node:fs'), path=require('node:path'), vm=require('node:vm');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
 const script=fs.readFileSync(path.join(root,'ricochet.js'),'utf8');
-const instrumented=script.replace('function Ey(r){','globalThis.TEST_API={THREE:Le,ROOM:Yt,CONFIG:Dt,CATCH:De,PANELS:Yo,DiscPhysics:Ko};function Ey(r){');
+const roomSymbol=script.match(/([A-Za-z_$][\w$]*)=\{L:11,W:12,CENTER_Y:/)?.[1];
+assert.ok(roomSymbol,'compiled room configuration must be present');
+const instrumented=script.replace('function Ey(r){',`globalThis.TEST_API={THREE:Le,ROOM:${roomSymbol},CONFIG:Dt,CATCH:De,PANELS:Yo,DiscPhysics:Ko};function Ey(r){`);
 assert.notEqual(script,instrumented,'Failed to locate bundle export point; do not silently pass');
 const sandbox={window:{addEventListener(){}},document:{readyState:'loading',addEventListener(){}},console,AbortController,EventTarget,URL,URLSearchParams};
 vm.runInNewContext(instrumented,sandbox,{timeout:10000});
@@ -56,8 +58,8 @@ test('four true side-wall bank shots score without extra panel hits',()=>{
 });
 // 4. Gameplay rules other than arena horizontal geometry are unchanged.
 test('catch, goal, ceiling and online match physics constants preserved',()=>{
- assert.equal(C.VERSION,'2.9.5');assert.equal(ROOM.CEILING_Y+ROOM.L,6.8);
- assert.equal(C.GOAL_A,4);assert.equal(C.GOAL_B,1.25);
+ assert.equal(C.VERSION,'2.9.6');assert.equal(ROOM.CEILING_Y+ROOM.L,6.8);
+ assert.equal(C.GOAL_A,12/2.5);assert.equal(C.GOAL_B,1.25);
  assert.equal(C.MATCH_TIME,180);assert.equal(C.SIM_STEP,1/120);
  assert.equal(C.SHOT_SPEED,16);
  assert.equal(CATCH.range,2.5);assert.equal(CATCH.angleDeg,62);
@@ -69,7 +71,7 @@ test('source and static bundle are in sync',()=>{
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const pkg=require(path.join(root,'package.json'));
  assert.equal(pkg.version,C.VERSION);assert.ok(html.includes(`ricochet.js?v=${C.VERSION}`));
- assert.ok(html.includes('コート24m'));assert.ok(source.includes("VERSION: '2.9.5'"));
+ assert.ok(html.includes('コート24m'));assert.ok(source.includes("VERSION: '2.9.6'"));
  assert.ok(/W: 12,/.test(source));
  for(const p of PANELS)assert.ok(source.includes(`id: '${p.id}'`));
 });
