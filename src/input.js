@@ -21,6 +21,7 @@ export class Input {
   press(name) { if (this.enabled) this.pressed.add(name); }
   consume(name) { const had = this.pressed.has(name); this.pressed.delete(name); return had; }
   clearPresses() { this.pressed.clear(); this.curveSteps=0;this.curveValue=null;this.wheelRemainder=0; }
+  resetCurve(){this.curveSteps=0;this.curveValue=null;this.wheelRemainder=0;}
   consumeCurveValue(current){
     const start=this.curveValue??current;
     const value=Math.max(-1,Math.min(1,Math.round((start+this.curveSteps*CONFIG.CURVE_STEP_DEG/CONFIG.CURVE_MAX_DEG)*10)/10));

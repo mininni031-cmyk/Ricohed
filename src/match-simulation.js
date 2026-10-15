@@ -19,7 +19,7 @@ export class MatchSimulation {
     this.score={cyan:0,pink:0};this.timeLeft=C.MATCH_TIME;this.simTime=0;this.matchClock=0;this.state='waiting';this.events=[];this.eventSeq=0;this.resetPositions();
   }
   resetPositions(restartTeam=null){
-    for(const team of teams){const a=this.athletes[team];a.reset(new THREE.Vector3(team==='cyan'?-C.SPAWN_DIST:C.SPAWN_DIST,-ROOM.L,0),new THREE.Vector3(0,1,0));a.yaw=team==='cyan'?-Math.PI/2:Math.PI/2;a.pitch=-.05;a.curve=0;a.chargeStart=null;a.justUntil=a.wallShotUntil=a.catchPressT=a.shotBufferedUntil=-99;a.lastOkCatchT=-99;a.catchFlightId=null;a.firstCatchT=-99;this.inputs[team]={yaw:a.yaw,pitch:a.pitch,moveX:0,moveY:0,curve:0};this.queues[team]=[];}
+    for(const team of teams){const a=this.athletes[team];a.reset(new THREE.Vector3(team==='cyan'?-C.SPAWN_DIST:C.SPAWN_DIST,-ROOM.L,0),new THREE.Vector3(0,1,0));a.curveEpoch??=0;a.yaw=team==='cyan'?-Math.PI/2:Math.PI/2;a.pitch=-.05;a.curve=0;a.chargeStart=null;a.justUntil=a.wallShotUntil=a.catchPressT=a.shotBufferedUntil=-99;a.lastOkCatchT=-99;a.catchFlightId=null;a.firstCatchT=-99;this.inputs[team]={yaw:a.yaw,pitch:a.pitch,moveX:0,moveY:0,curve:0};this.queues[team]=[];}
     this.disc.reset();if(restartTeam){const team=restartPossession(this.score,restartTeam);this.giveDisc(team,false);const a=this.athletes[team];this.disc.pos.copy(a.eye()).addScaledVector(this.forward(a),.6).addScaledVector(this.right(a),.25).addScaledVector(a.up,-.25);this.disc.prevPos.copy(this.disc.pos);}
   }
   start(){this.state='countdown';this.countT=0;}
@@ -41,6 +41,7 @@ export class MatchSimulation {
   giveDisc(team,caught,rescued=false){
     const a=this.athletes[team];const just=caught&&a.catchFlightId===this.disc.flightId&&Math.abs(a.catchPressT-a.firstCatchT)<=CATCH.justWindow+1e-9;
     for(const t of teams)this.athletes[t].holding=t===team;
+    a.curveEpoch=(a.curveEpoch||0)+1;a.curve=0;this.inputs[team].curve=0;for(const pending of this.queues[team])pending.curve=0;
     this.disc.hold(who(team));a.holdTime=0;a.catchWindow=a.catchBuffer=0;a.justUntil=just?this.simTime+CATCH.counterWindow:-99;
     if(caught){a.shootCd=0;a.catchCd=.15;this.emit('catch',{team,just,rescued});}else this.emit('pickup',{team});
     if(caught&&this.simTime<=a.shotBufferedUntil)this.shoot(team);
@@ -59,7 +60,7 @@ export class MatchSimulation {
   }
   move(team,dt){
     const a=this.athletes[team],other=this.athletes[team==='cyan'?'pink':'cyan'];let i=this.queues[team].shift();
-    if(i){this.inputs[team]={...this.inputs[team],yaw:i.yaw??a.yaw,pitch:i.pitch??a.pitch,moveX:i.moveX??0,moveY:i.moveY??0,curve:i.curve??a.curve};a.yaw=this.inputs[team].yaw;a.pitch=this.inputs[team].pitch;a.curve=this.inputs[team].curve;}
+    if(i){this.inputs[team]={...this.inputs[team],yaw:i.yaw??a.yaw,pitch:i.pitch??a.pitch,moveX:i.moveX??0,moveY:i.moveY??0,curve:(i.curveEpoch??0)===a.curveEpoch?(i.curve??a.curve):a.curve};a.yaw=this.inputs[team].yaw;a.pitch=this.inputs[team].pitch;a.curve=this.inputs[team].curve;}
     else i={};
     if(this.simTime-this.lastInputT[team]>.5){this.inputs[team].moveX=this.inputs[team].moveY=0;a.chargeStart=null;}
     const input=this.inputs[team],flat=new THREE.Vector3(-Math.sin(a.yaw),0,-Math.cos(a.yaw)),wish=flat.clone().multiplyScalar(input.moveY).addScaledVector(this.right(a),input.moveX);if(wish.lengthSq()>1)wish.normalize();
@@ -100,7 +101,7 @@ export class MatchSimulation {
     }
   }
   snapshot(){
-    const athletes={};for(const team of teams){const a=this.athletes[team];athletes[team]={...a.snapshot(),yaw:a.yaw,pitch:a.pitch,curve:a.curve,chargeStart:a.chargeStart,justUntil:a.justUntil,wallShotUntil:a.wallShotUntil,holdTime:a.holdTime,catchWindow:a.catchWindow,catchCd:a.catchCd,dashCd:a.dashCd,dashTime:a.dashTime,catchable:!a.holding&&a.dashTime<=0&&this.catchEval(team).ok,ack:this.seq[team]};}
+    const athletes={};for(const team of teams){const a=this.athletes[team];athletes[team]={...a.snapshot(),yaw:a.yaw,pitch:a.pitch,curve:a.curve,curveEpoch:a.curveEpoch,chargeStart:a.chargeStart,justUntil:a.justUntil,wallShotUntil:a.wallShotUntil,holdTime:a.holdTime,catchWindow:a.catchWindow,catchCd:a.catchCd,dashCd:a.dashCd,dashTime:a.dashTime,catchable:!a.holding&&a.dashTime<=0&&this.catchEval(team).ok,ack:this.seq[team]};}
     return {t:this.simTime,clock:this.matchClock,state:this.state,timeLeft:this.timeLeft,countT:this.countT||0,score:{...this.score},athletes,disc:{...this.disc.snapshot(),owner:teamOf(this.disc.owner),lastShooter:teamOf(this.disc.lastShooter),curveRate:this.disc.curveRate,curveLeft:this.disc.curveLeft,flightId:this.disc.flightId||0},keepers:this.keepers.map(k=>({team:k.team,z:k.z})),events:[...this.events]};
   }
 }

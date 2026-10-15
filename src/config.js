@@ -57,7 +57,7 @@ export const GOAL_SCALE = 1;
 
 export const CONFIG = {
   GOAL_SCALE,
-  VERSION: '2.9.9',
+  VERSION: '2.9.10',
   MATCH_TIME: 180,
   SIM_STEP: 1 / 120,          // fixed simulation step (deterministic, frame-rate independent)
 
@@ -93,7 +93,7 @@ export const CONFIG = {
   CHARGE_MULTIPLIER: 1.4,
   CURVE_SPEED: 14,
   CURVE_MAX_DEG: 50,
-  CURVE_STEP_DEG: 5,
+  CURVE_STEP_DEG: 10,
   CURVE_RATE: 50 * Math.PI / 180,
   CURVE_TIME: 1.0,
   SHOT_SPEED: 16,             // v2.6 (v2.5.2: 21). Fast shots can be added via SHOT_SPEEDS later

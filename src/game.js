@@ -622,6 +622,7 @@ export class Game {
     a.justUntil = just ? this.simTime + CATCH.counterWindow : -99;
     if (caught && who === 'player') a.shootCd = 0;
     const from = this.disc.pos.clone();
+    a.curve=0;if(who==='player')this.input.resetCurve();this.guideFrame=-99;
     this.disc.hold(who);
     a.holding = true; a.holdTime = 0; a.catchWindow = 0; a.catchBuffer = 0; a.catchCd = caught ? 0.15 : a.catchCd;
     this.trail.reset();

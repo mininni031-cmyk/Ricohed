@@ -14,8 +14,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium
     assert.ok(room.match.events.some(e=>e.type==='shot'&&e.team===(i?'pink':'cyan')&&e.speed===14&&e.curve===-1));checks++;
   }
   await pages[0].evaluate(()=>{__RICO.game.player.curve=0;});
-  await pages[0].mouse.move(640,360);await pages[0].mouse.wheel(0,-100);await pages[0].waitForFunction(()=>Math.abs(__RICO.game.player.curve+.1)<1e-9);await pages[0].waitForFunction(()=>__RICO.game.online.latest.snapshot.athletes.cyan.curve===-.1);checks++;
-  await pages[0].mouse.wheel(0,200);await pages[0].waitForFunction(()=>Math.abs(__RICO.game.player.curve-.1)<1e-9);await pages[0].waitForFunction(()=>__RICO.game.online.latest.snapshot.athletes.cyan.curve===.1);checks++;
+  await pages[0].mouse.move(640,360);await pages[0].mouse.wheel(0,-100);await pages[0].waitForFunction(()=>Math.abs(__RICO.game.player.curve+.2)<1e-9);await pages[0].waitForFunction(()=>__RICO.game.online.latest.snapshot.athletes.cyan.curve===-.2);checks++;
+  await pages[0].mouse.wheel(0,200);await pages[0].waitForFunction(()=>Math.abs(__RICO.game.player.curve-.2)<1e-9);await pages[0].waitForFunction(()=>__RICO.game.online.latest.snapshot.athletes.cyan.curve===.2);checks++;
+  room.match.giveDisc('cyan',false);app.rooms.broadcast(room);await pages[0].waitForFunction(()=>__RICO.game.player.curve===0);await pages[0].waitForFunction(()=>__RICO.game.online.latest.snapshot.athletes.cyan.curve===0);checks++;
+  await pages[0].keyboard.press('KeyX');await pages[0].waitForFunction(()=>__RICO.game.player.curve===1);room.match.giveDisc('cyan',true);app.rooms.broadcast(room);await pages[0].waitForFunction(()=>__RICO.game.player.curve===0);checks++;
   room.match.keepers=[];room.match.disc.keepers=[];room.match.disc.panels=[];room.match.state='playing';const m=room.match.goals.active().pink;room.match.disc.launch(m.center.clone().addScaledVector(m.normal,-1),m.normal,'player',16);room.match.disc.bounces=2;
   for(const p of pages)await p.waitForFunction(()=>__RICO.game.score.cyan===3);checks++;
   await pages[0].evaluate(()=>__RICO.game.online.socket.close());await pages[1].waitForFunction(()=>__RICO.game.online.latest.status==='reconnecting');await pages[0].waitForFunction(()=>__RICO.game.online.latest.status==='active',{},{timeout:15000});checks++;

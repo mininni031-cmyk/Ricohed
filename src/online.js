@@ -71,6 +71,7 @@ export class OnlineSession {
       const mine=s.score[this.team],theirs=s.score[other];document.getElementById('resultTitle').textContent=m.status==='aborted'?'試合中断':mine>theirs?'YOU WIN!':mine<theirs?'YOU LOSE':'DRAW';document.getElementById('resultScore').textContent=`CYAN ${s.score.cyan} — ${s.score.pink} PINK`;document.getElementById('resultStats').textContent=m.status==='aborted'?(m.reason==='opponent-left'?'相手が退出しました。':'再接続期限切れで終了しました。'):'双方が再戦を選ぶと、同じ部屋でもう一度遊べます。';document.getElementById('rematch').hidden=m.status==='aborted';document.getElementById('rematch').textContent='再戦する';this.status(m.status==='aborted'?'試合が中断されました。':'試合が終了しました。');}
     if(m.status==='ended')this.updateRematch(m);
     for(const e of s.events){if(e.id<=this.eventId)continue;this.eventId=e.id;
+      if((e.type==='pickup'||e.type==='catch')&&e.team===this.team){g.player.curve=0;g.input.resetCurve?.();g.guideFrame=-99;}
       if(e.type==='shot'){g.trail.reset();g.setDiscColor(0);if(e.curve)g.trail.color.set(0xffdc63);if(e.team===this.team)g.arms.triggerThrow();else g.cpuChar.play('throw',.14,40);g.audio.play('throw');}
       if(e.type==='bounce'){if(/^[CK]\d/.test(e.surface))g.arena.flashPanel(e.surface);if(e.point)g.sparks.burst(new THREE.Vector3(...e.point),0xffdc63,16,5,.1,.3,3);g.setDiscColor(e.count);g.ui.bounceCount(e.count,Math.min(3,e.count+1),String(e.surface).startsWith('rim:'));g.audio.play('bounce');}
       if(e.type==='catch'){g.trail.reset();if(e.team===this.team)g.ui.catchSuccess(e.rescued,e.just);g.audio.play('catch');}
@@ -82,7 +83,7 @@ export class OnlineSession {
   sendInput(actions={},forceNeutral=false){
     if(!this.team||!this.connected||this.socket?.readyState!==WebSocket.OPEN)return;
     const g=this.g,p=g.player,ax=forceNeutral?{x:0,y:0}:g.input.axes();
-    this.send({type:'input',input:{seq:++this.seq,yaw:((p.yaw+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI,pitch:p.pitch,moveX:ax.x,moveY:ax.y,curve:p.curve||0,...actions}});
+    this.send({type:'input',input:{seq:++this.seq,yaw:((p.yaw+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI,pitch:p.pitch,moveX:ax.x,moveY:ax.y,curve:p.curve||0,curveEpoch:this.latest?.snapshot?.athletes?.[this.team]?.curveEpoch||0,...actions}});
   }
   update(dt){
     const g=this.g,p=g.player,i=g.input,s=this.latest?.snapshot;
