@@ -40,7 +40,7 @@ setup();g.giveDisc('player',false);g.player.grounded=false;g.player.wallShotUnti
 setup();g.player.grounded=false;g.player.pos.y=-__RICO.ROOM.L+.01;g.player.vel.set(0,-2,0);g.player.wallShotUntil=g.simTime+.8;run(10);check('landing cancels wall bonus',g.player.grounded&&g.player.wallShotUntil<g.simTime);
 
 check('goal opening court/2.5 height2.5',R.CONFIG.GOAL_A===12/2.5&&R.CONFIG.GOAL_B===1.25&&R.CONFIG.GOAL_Y===2.3);
-check('clearer curve angle',Math.abs(R.CONFIG.CURVE_RATE*R.CONFIG.CURVE_TIME-25*Math.PI/180)<1e-9);
+check('clearer curve angle',Math.abs(R.CONFIG.CURVE_RATE*R.CONFIG.CURVE_TIME-50*Math.PI/180)<1e-9);
 setup();g.giveDisc('player',false);g.player.curve=-1;g.updateVisuals(0,true);check('visible curved direction guide',!!g.shotGuide?.visible);
 setup();g.giveDisc('player',false);g.player.curve=0;g.guideFrame=-99;g.updateShotGuide();check('straight prediction visible',g.shotGuide.visible&&g.shotGuide.geometry.drawRange.count>10);check('trajectory legend',document.getElementById('trajectoryLegend').textContent.includes('立体ガイド'));
 

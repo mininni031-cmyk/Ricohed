@@ -1,5 +1,6 @@
 import {CONFIG,ROOM} from './config.js';
 
+export function restartPossession(score,conceded){return score.cyan===score.pink?conceded:score.cyan<score.pink?'cyan':'pink';}
 // A neutral disc in the conceding half, clear of the reset player and side panels.
 export function placeRestartDisc(disc,team,rng){
   const sign=team==='cyan'?-1:1;

@@ -1,7 +1,8 @@
 import {QUALITY_PROFILES,readQuality} from './quality.js';
-import {placeRestartDisc} from './restart.js';
+import {placeRestartDisc,restartPossession} from './restart.js';
 import {TrajectoryVolume} from './trajectory-volume.js';
 import {OnlineSession} from './online.js';
+import {applyCurveControls} from './curve-controls.js';
 import {shotParameters} from './shot.js';
 import {predictShot} from './prediction.js';
 import { segmentHitsOBB, updatePanelColliders } from './physics.js';
@@ -227,12 +228,13 @@ export class Game {
     const up = this.up();
     this.player.reset(this.spawnPos('cyan'), up); this.player.yaw = -Math.PI / 2; this.player.pitch = -0.05;
     this.cpuA.reset(this.spawnPos('pink'), up); this.cpu.reset(); this.cpu.facingDir = this.gravity.teamDir('cyan');
-    this.disc.reset(); if(restartTeam)placeRestartDisc(this.disc,restartTeam,this.rng); this.trail.reset(); this.input.clearPresses(); this.suction = null;
+    this.disc.reset(); this.trail.reset(); this.input.clearPresses(); this.suction = null;
     this.lastOkCatchT = -99; this.catchFlightId = null; this.firstCatchT = -99;
     this.player.wallShotUntil = -99;
     this.player.chargeStart = null; this.player.curve = 0;
     this.player.justUntil = -99; this.player.catchPressT = -99; this.player.shotBufferedUntil = -99;
     this.cpuChar.setBase('idle'); this.cpuChar.setExpression('normal');
+    if(restartTeam){this.giveDisc(restartPossession(this.score,restartTeam)==='cyan'?'player':'cpu',false);this.stepDisc(0);}
   }
   showMenuMode(mode){
     const online=mode==='online';document.getElementById('menuHome').hidden=online;document.getElementById('onlinePanel').hidden=!online;document.getElementById('menuExtras').hidden=online;this.input.keys.clear();this.input.clearPresses();if(online)document.getElementById('netRoom').focus();
@@ -400,10 +402,7 @@ export class Game {
     }
     if (inp.consume('catch')) this.pressCatch(p, 'player');
     else if (p.catchBuffer > 0) { p.catchBuffer -= h; if (p.catchBuffer > 0 && this.canOpenWindow(p).ok && this.disc.state === 'FLYING') { p.catchBuffer = 0; this.openWindow(p, 'player'); } }
-    if (inp.consume('curveLeft')) p.curve = -1;
-    if (inp.consume('curveRight')) p.curve = 1;
-    if (inp.consume('curveStraight')) p.curve = 0;
-    if (inp.consume('curveCycle')) p.curve = p.curve === 0 ? -1 : p.curve === -1 ? 1 : 0;
+    applyCurveControls(p,inp);
     if (inp.consume('chargeCancel') || !p.holding) p.chargeStart = null;
     if (inp.consume('chargeStart') && p.holding) p.chargeStart = this.simTime;
     if (inp.consume('chargeRelease') && p.chargeStart != null && p.holding) this.playerShoot();
@@ -420,7 +419,7 @@ export class Game {
     }
     if (p.atHalfLine) { this.arena.touchHalfLine('cyan', p.pos); if (!this.halfLineToldT || this.simTime - this.halfLineToldT > 2.5) { this.halfLineToldT = this.simTime; this.ui.chip('HALF LINE — 相手陣地には入れない', 0.9); } }
     if (p.catchWindow > 0) { p.catchWindow -= h; p.catchWindowAge += h; if (p.catchWindow <= 0 && !p.holding) { p.catchCd = CATCH.cooldown; this.lastWindowMiss = this.lastCatchEval ? this.lastCatchEval.reason : 'no-flight'; } }
-    if (p.holding && p.holdTime > C.HOLD_LIMIT) { this.dropFrom(p); this.ui.callout('HOLD TIME!', 'ディスクを落とした', 'gold', 1); }
+    if (p.holding && p.holdTime > C.HOLD_LIMIT) this.turnoverFrom(p);
   }
 
   // ---------------------------------------------------------------- catching (CatchSystem glue)
@@ -529,6 +528,11 @@ export class Game {
     this.trail.reset(); this.setDiscColor(0); if(a.curve) this.trail.color.set(0xffdc63);
     this.bus.emit('DISC_THROWN', { who, speed });
   }
+  turnoverFrom(a) {
+    for(const athlete of [this.player,this.cpuA]){athlete.holding=false;athlete.holdTime=0;athlete.chargeStart=null;athlete.justUntil=athlete.wallShotUntil=athlete.shotBufferedUntil=-99;}
+    const team=a.team==='cyan'?'pink':'cyan';this.disc.reset();placeRestartDisc(this.disc,team,this.rng);this.trail.reset();this.suction=null;this.guideFrame=-99;
+    this.ui.callout('HOLD TIME!', '7秒超過：相手陣地へ', 'gold', 1.5);
+  }
   dropFrom(a) { a.chargeStart = null; a.holding = false; a.holdTime = 0; a.noPickup = 1.0; this.disc.drop(); } // the dropper cannot re-grab for 1 s
 
   stepCPU(h) {
@@ -550,7 +554,7 @@ export class Game {
     a.step(h, o.wish, this.envFor(a, this.player));
     if (a.atHalfLine) this.arena.touchHalfLine('pink', a.pos);
     if (a.catchWindow > 0) { a.catchWindow -= h; a.catchWindowAge += h; if (a.catchWindow <= 0 && !a.holding) a.catchCd = CPU_CATCH.cooldown; }
-    if (a.holding && a.holdTime > C.HOLD_LIMIT) this.dropFrom(a);
+    if (a.holding && a.holdTime > C.HOLD_LIMIT) this.turnoverFrom(a);
     // facing (room direction perpendicular to up)
     let target = o.faceTo ? _v1.subVectors(o.faceTo, a.pos) : (o.wish.lengthSq() > 0.01 ? _v1.copy(o.wish) : null);
     const fd = this.cpu.facingDir; fd.addScaledVector(a.up, -fd.dot(a.up));

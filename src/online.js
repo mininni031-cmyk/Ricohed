@@ -1,3 +1,4 @@
+import {applyCurveControls} from './curve-controls.js';
 import * as THREE from 'three';
 import {updatePanelColliders} from './physics.js';
 const errors={full:'この部屋は満員です。別の合言葉を使ってください。',room:'合言葉は4〜48文字で入力してください。',expired:'再接続期限が過ぎたか、サーバーが再起動しました。',ended:'この部屋の試合は終了しています。新しい合言葉を使ってください。',capacity:'サーバーが混み合っています。少し待ってください。',input:'操作データが拒否されました。',json:'通信データを読み取れませんでした。'};
@@ -74,6 +75,7 @@ export class OnlineSession {
       if(e.type==='bounce'){if(/^[CK]\d/.test(e.surface))g.arena.flashPanel(e.surface);if(e.point)g.sparks.burst(new THREE.Vector3(...e.point),0xffdc63,16,5,.1,.3,3);g.setDiscColor(e.count);g.ui.bounceCount(e.count,Math.min(3,e.count+1),String(e.surface).startsWith('rim:'));g.audio.play('bounce');}
       if(e.type==='catch'){g.trail.reset();if(e.team===this.team)g.ui.catchSuccess(e.rescued,e.just);g.audio.play('catch');}
       if(e.type==='goal'){g.arena.flashGoal(e.team==='cyan'?'pink':'cyan');g.ui.goal(e.team,e.value,e.value-1,false);g.audio.play('goal');g.setBanner(`GOAL +${e.value}`,e.team==='cyan'?'#35e8ff':'#ff4fa3',2);}
+      if(e.type==='turnover'){g.trail.reset();g.ui.callout('HOLD TIME!','7秒超過：相手陣地へ','gold',1.5);}
       if(e.type==='save'){const k=g.keepers.find(k=>k.team===e.team);k?.onSave(e.lat);g.ui.block(e.team);g.audio.play('block');}
     }
   }
@@ -85,7 +87,7 @@ export class OnlineSession {
   update(dt){
     const g=this.g,p=g.player,i=g.input,s=this.latest?.snapshot;
     const active=this.connected&&this.socket?.readyState===WebSocket.OPEN&&this.latest?.status==='active';
-    if(i.enabled){g.applyLook();if(i.consume('curveLeft'))p.curve=-1;if(i.consume('curveRight'))p.curve=1;if(i.consume('curveStraight'))p.curve=0;if(i.consume('curveCycle'))p.curve=p.curve===0?-1:p.curve===-1?1:0;}
+    if(i.enabled){g.applyLook();applyCurveControls(p,i);}
     this.acc+=dt;if(this.acc>=1/30){this.acc%=1/30;const actions={};for(const key of ['jump','dash','catch','shoot','chargeStart','chargeRelease','chargeCancel'])if(i.consume(key))actions[key]=true;this.sendInput(actions,!i.enabled||this.localPaused);}
     if(performance.now()-this.lastPing>2000){this.lastPing=performance.now();this.send({type:'ping',sent:this.lastPing});}
     if(!s)return;

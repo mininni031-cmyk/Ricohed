@@ -164,10 +164,13 @@ export class UIManager {
     const wallShot = !p.grounded && g.simTime <= p.wallShotUntil + 1e-9;
     this.set('chipAir', 'text', wallShot ? `WALL SHOT +10% ${Math.max(0, p.wallShotUntil - g.simTime).toFixed(2)}s` : p.grounded ? 'GROUND' : kickReady ? 'WALL KICK OK' : p.airJumps > 0 ? 'AIR ・ 2段目OK' : 'AIR');
     this.set('chipAir', 'class', p.grounded ? '' : kickReady ? 'on kick' : 'on');
-    this.set('curveGuide', 'text', p.holding && p.curve ? (p.curve < 0 ? '← 左カーブ' : '右カーブ →') + '' : p.holding ? '直線' : '');
+    const curveAngle=Math.round(Math.abs(p.curve||0)*CONFIG.CURVE_MAX_DEG);
+    this.set('curveGuide', 'text', p.curve ? (p.curve < 0 ? '← 左カーブ ' : '右カーブ → ') + curveAngle+'°' : p.holding ? '直線' : '');
+    const slider=$('tCurveSlider');if(slider&&document.activeElement!==slider)slider.value=String(Math.round((p.curve||0)*CONFIG.CURVE_MAX_DEG));
+    this.set('tCurveAngle','text',p.curve?(p.curve<0?'左 ':'右 ')+curveAngle+'°':'直線 0°');
     this.set('curveGuide', 'class', p.holding && p.curve ? 'selected' : '');
     this.set('tCurve', 'text', p.curve < 0 ? '← LEFT' : p.curve > 0 ? 'RIGHT →' : 'STRAIGHT');
-    this.set('chipShot', 'text', `${p.curve === -1 ? 'CURVE LEFT' : p.curve === 1 ? 'CURVE RIGHT' : 'STRAIGHT'}${p.holding && p.chargeStart != null ? ' / CHARGE ' + Math.round(Math.min(1, (g.simTime - p.chargeStart) / CONFIG.CHARGE_TIME) * 100) + '%' : ''}`);
+    this.set('chipShot', 'text', `${p.curve < 0 ? 'CURVE LEFT '+curveAngle+'°' : p.curve > 0 ? 'CURVE RIGHT '+curveAngle+'°' : 'STRAIGHT'}${p.holding && p.chargeStart != null ? ' / CHARGE ' + Math.round(Math.min(1, (g.simTime - p.chargeStart) / CONFIG.CHARGE_TIME) * 100) + '%' : ''}`);
     this.set('chipCatch', 'text', p.holding && g.simTime <= p.justUntil + 1e-9 ? `COUNTER +15% ${Math.max(0, p.justUntil - g.simTime).toFixed(2)}s` : p.catchWindow > 0 ? 'CATCHING' : p.catchCd > 0 ? `CATCH ${p.catchCd.toFixed(1)}s` : 'CATCH READY');
     this.set('chipCatch', 'class', p.catchWindow > 0 ? 'on' : '');
     this.set('actShoot', 'class', 'act ' + (p.holding ? 'ready active' : 'locked'));

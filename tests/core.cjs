@@ -14,5 +14,5 @@ for(const [z,y] of [[0,0],[c.GOAL_A-.15,0],[0,1.15],[c.GOAL_A*.7,.7]])test('elli
 for(const [z,y] of [[0,1.3],[c.GOAL_A+.05,0],[c.GOAL_A*.9,.7]])test('ellipse rejects '+z+','+y,()=>assert.equal(shoot(z,y).events.some(e=>e.type==='goal'),false));
 test('ellipse fast rim contact single event',()=>{const e=shoot(c.GOAL_A+.03,0,90).events;assert.equal(e.some(x=>x.type==='goal'),false);assert.equal(e.filter(x=>x.rim).length,1);});
 for(const b of [0,1,2,5])test('points '+b,()=>assert.equal(shoot(0,0,16,b).events.find(e=>e.type==='goal')?.value,Math.min(3,b+1)));
-test('curve total 25 degrees symmetric and constant speed',()=>{assert.equal(c.CURVE_SPEED,14);for(const sign of [-1,1]){const v=V(14,0,0);let left=c.CURVE_TIME;for(let i=0;i<240;i++)left=R.advanceCurve(v,V(0,1,0),sign*c.CURVE_RATE,left,1/120);assert.ok(Math.abs(v.length()-14)<1e-8);assert.ok(Math.abs(Math.atan2(-v.z,v.x)-sign*25*Math.PI/180)<1e-8);}});
+test('curve total 50 degrees symmetric and constant speed',()=>{assert.equal(c.CURVE_SPEED,14);for(const sign of [-1,1]){const v=V(14,0,0);let left=c.CURVE_TIME;for(let i=0;i<240;i++)left=R.advanceCurve(v,V(0,1,0),sign*c.CURVE_RATE,left,1/120);assert.ok(Math.abs(v.length()-14)<1e-8);assert.ok(Math.abs(Math.atan2(-v.z,v.x)-sign*50*Math.PI/180)<1e-8);}});
 console.log('Core passed '+count);if(process.exitCode)process.exit(process.exitCode);

@@ -282,3 +282,6 @@ body.reduce-motion #fx-speed{display:none}
 #motion .stage{top:90px}#motion .goalFx b{font-size:36px}#motion .goalFx i{font-size:12px}#motion .goalFx .stripe{display:none}
 #callout{top:110px}#calloutMain{font-size:20px}#calloutSub{display:none}#bounceChip{top:125px;bottom:auto;font-size:11px}
 @media(max-height:500px){#motion .center,#motion .pop,#motion .stage,#motion .side{top:55px}#callout{top:65px}#bounceChip{top:85px}}
+
+#tCurveControl{position:absolute;right:calc(184px + var(--safe-r));bottom:176px;width:136px;pointer-events:auto;background:#071b32df;border-radius:10px;padding:6px 8px;font:11px system-ui;text-align:center;color:#ffe477;touch-action:none}#tCurveControl span{display:block;margin-bottom:3px}#tCurveSlider{width:100%;margin:0;accent-color:#ffe477;touch-action:none}
+@media(max-height:450px){#tCurveControl{bottom:172px;width:118px;padding:4px 6px}}

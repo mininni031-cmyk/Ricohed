@@ -8,7 +8,7 @@ import {KeeperPhysics} from './keeper-physics.js';
 import {evalCatch} from './catch.js';
 import {shotParameters} from './shot.js';
 import {Rng} from './rng.js';
-import {placeRestartDisc} from './restart.js';
+import {placeRestartDisc,restartPossession} from './restart.js';
 const teams=['cyan','pink'],who=t=>t==='cyan'?'player':'cpu',teamOf=w=>w==='player'?'cyan':w==='cpu'?'pink':null;
 export class MatchSimulation {
   constructor({seed=20261014}={}){
@@ -20,7 +20,7 @@ export class MatchSimulation {
   }
   resetPositions(restartTeam=null){
     for(const team of teams){const a=this.athletes[team];a.reset(new THREE.Vector3(team==='cyan'?-C.SPAWN_DIST:C.SPAWN_DIST,-ROOM.L,0),new THREE.Vector3(0,1,0));a.yaw=team==='cyan'?-Math.PI/2:Math.PI/2;a.pitch=-.05;a.curve=0;a.chargeStart=null;a.justUntil=a.wallShotUntil=a.catchPressT=a.shotBufferedUntil=-99;a.lastOkCatchT=-99;a.catchFlightId=null;a.firstCatchT=-99;this.inputs[team]={yaw:a.yaw,pitch:a.pitch,moveX:0,moveY:0,curve:0};this.queues[team]=[];}
-    this.disc.reset();if(restartTeam)placeRestartDisc(this.disc,restartTeam,this.rng);
+    this.disc.reset();if(restartTeam){const team=restartPossession(this.score,restartTeam);this.giveDisc(team,false);const a=this.athletes[team];this.disc.pos.copy(a.eye()).addScaledVector(this.forward(a),.6).addScaledVector(this.right(a),.25).addScaledVector(a.up,-.25);this.disc.prevPos.copy(this.disc.pos);}
   }
   start(){this.state='countdown';this.countT=0;}
   emit(type,data={}){this.events.push({id:++this.eventSeq,type,...data});if(this.events.length>24)this.events.shift();}
@@ -72,7 +72,11 @@ export class MatchSimulation {
     const ev=a.step(dt,wish,{up:new THREE.Vector3(0,1,0),halfLine:{dir:this.gravity.teamDir(team),on:true},others:[{pos:other.pos},]});
     if(ev.some(e=>e.type==='land'))a.wallShotUntil=-99;
     if(a.catchWindow>0){a.catchWindow-=dt;a.catchWindowAge+=dt;if(a.catchWindow<=0&&!a.holding)a.catchCd=CATCH.cooldown;}
-    if(a.holding&&a.holdTime>C.HOLD_LIMIT){a.holding=false;a.chargeStart=null;a.noPickup=1;this.disc.drop();}
+    if(a.holding&&a.holdTime>C.HOLD_LIMIT)this.turnover(team);
+  }
+  turnover(team){
+    for(const t of teams){const a=this.athletes[t];a.holding=false;a.holdTime=0;a.chargeStart=null;a.justUntil=a.wallShotUntil=a.shotBufferedUntil=-99;}
+    const other=team==='cyan'?'pink':'cyan';this.disc.reset();placeRestartDisc(this.disc,other,this.rng);this.emit('turnover',{team:other});
   }
   checkCatches(){for(const team of teams){const a=this.athletes[team],ev=this.catchEval(team);if(ev.ok)this.recordCatchZone(team);if(ev.ok&&a.catchWindow>0&&a.dashTime<=0&&!a.holding){this.giveDisc(team,true);return true;}}return false;}
   pickups(){let best=null,bestD=C.PICKUP_RADIUS;for(const team of teams){const a=this.athletes[team];if(a.dashTime>0||a.noPickup>0)continue;const rel=this.disc.pos.clone().sub(a.pos),height=rel.dot(a.up);if(height>1||height<-.5||this.disc.pos.dot(this.gravity.teamDir(team))<-C.HALF_LINE_PICKUP_REACH)continue;rel.addScaledVector(a.up,-height);const d=rel.length();if(d<bestD){best=team;bestD=d;}}if(best)this.giveDisc(best,false);}

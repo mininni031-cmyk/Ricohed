@@ -1,13 +1,15 @@
 // Input: keyboard + mouse (pointer lock with drag-look fallback) + touch (stick, look area, buttons).
 // Produces a per-frame snapshot plus one-shot "pressed" events consumed by the game.
 
+import {CONFIG} from './config.js';
+
 export class Input {
   constructor(canvas, isTouch) {
     this.canvas = canvas; this.isTouch = isTouch;
     this.keys = new Set();
     this.stick = { x: 0, y: 0 };
     this.lookDX = 0; this.lookDY = 0;
-    this.pressed = new Set();
+    this.pressed = new Set(); this.curveSteps=0; this.curveValue=null; this.wheelRemainder=0;
     this.locked = false; this.lockFailed = false;
     this.sensitivity = 0.0024; this.touchSens = 0.0055;
     this.enabled = false;
@@ -18,7 +20,12 @@ export class Input {
   on(target, ev, fn, opt) { target.addEventListener(ev, fn, opt); this.listeners.push([target, ev, fn, opt]); }
   press(name) { if (this.enabled) this.pressed.add(name); }
   consume(name) { const had = this.pressed.has(name); this.pressed.delete(name); return had; }
-  clearPresses() { this.pressed.clear(); }
+  clearPresses() { this.pressed.clear(); this.curveSteps=0;this.curveValue=null;this.wheelRemainder=0; }
+  consumeCurveValue(current){
+    const start=this.curveValue??current;
+    const value=Math.max(-1,Math.min(1,Math.round((start+this.curveSteps*CONFIG.CURVE_STEP_DEG/CONFIG.CURVE_MAX_DEG)*10)/10));
+    this.curveSteps=0;this.curveValue=null;return value;
+  }
 
   bind() {
     const gesture = () => this.onFirstGesture && this.onFirstGesture();
@@ -57,6 +64,13 @@ export class Input {
       if (e.button === 0) this.press('shoot');
       if (e.button === 2) this.press('catch');
     });
+    this.on(this.canvas,'wheel',e=>{
+      if(!this.enabled||this.isTouch||!Number.isFinite(e.deltaY))return;
+      e.preventDefault();
+      this.wheelRemainder+=e.deltaY*(e.deltaMode===1?100/3:e.deltaMode===2?100:1);
+      const steps=Math.trunc(this.wheelRemainder/100);
+      this.wheelRemainder-=steps*100;this.curveSteps+=steps;
+    },{passive:false});
     this.on(this.canvas, 'contextmenu', (e) => e.preventDefault());
     this.on(document, 'pointerlockchange', () => {
       this.locked = document.pointerLockElement === this.canvas;
@@ -121,6 +135,11 @@ export class Input {
       this.on(el, 'pointerup', up); this.on(el, 'pointercancel', up); this.on(el, 'pointerleave', up);
     };
     btn('tCurve', 'curveCycle');
+    const curveSlider=document.getElementById('tCurveSlider');
+    if(curveSlider){
+      this.on(curveSlider,'pointerdown',e=>{gesture();e.stopPropagation();});
+      this.on(curveSlider,'input',e=>{if(!this.enabled)return;const angle=Number(e.target.value);if(Number.isFinite(angle)){this.curveValue=Math.max(-1,Math.min(1,angle/CONFIG.CURVE_MAX_DEG));this.curveSteps=0;}});
+    }
     const charge = document.getElementById('tCharge');
     if (charge) {
       this.on(charge, 'pointerdown', e => { gesture(); e.preventDefault(); e.stopPropagation(); charge.setPointerCapture(e.pointerId); this.press('chargeStart'); });

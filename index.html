@@ -68,6 +68,7 @@
   <div id="stick"><div id="nub"></div></div>
   <button id="tCharge" class="tbtn">HOLD CHARGE</button>
   <button id="tCurve" class="tbtn">CURVE</button>
+  <label id="tCurveControl"><span id="tCurveAngle">直線 0°</span><input id="tCurveSlider" type="range" min="-50" max="50" step="5" value="0" aria-label="カーブ角度：左50度から右50度"></label>
   <button id="tShoot" class="tbtn big">SHOOT</button>
   <button id="tCatch" class="tbtn">CATCH<i class="cd"></i></button>
   <button id="tDash" class="tbtn">DASH<i class="cd"></i></button>
@@ -98,7 +99,7 @@
         <details id="connectionSettings"><summary>接続設定（管理用）</summary><label>接続先 <input id="netUrl" type="url" placeholder="接続先を設定" autocomplete="off"></label></details>
       </div>
       <div id="menuExtras">
-        <details class="menuDetails"><summary>遊び方・操作</summary><p class="small">WASDで移動、マウスで視点。左クリックで投げ、F／右クリックでキャッチ。Eで直線・左カーブ・右カーブを切り替え。<br>Q長押し→離すとチャージ、Spaceでジャンプ／壁キック、Shiftでダッシュ。スマホは横画面で画面ボタンを使います。<br>予測の帯は緑：直線、黄：カーブ、紫：1反射、橙：2反射以上。キーパー・相手のキャッチ・空中のばらつきは含みません。<br>左右に移動して反射コースを作り、飛んでくる位置に合わせてキャッチ。上段パネルはゆっくり往復します。<br>ハーフラインは越えられません。キャッチ直後の反撃と、壁キック後の空中投球は強化されます。</p></details>
+        <details class="menuDetails"><summary>遊び方・操作</summary><p class="small">WASDで移動、マウスで視点。左クリックで投げ、F／右クリックでキャッチ。ホイール前で左・後ろで右に5°ずつ調整（最大50°）。Z／Xで左右最大、Cで直線、Eで切り替え。<br>Q長押し→離すとチャージ、Spaceでジャンプ／壁キック、Shiftでダッシュ。スマホは横画面で画面ボタンとカーブスライダーを使います。<br>予測の帯は緑：直線、黄：カーブ、紫：1反射、橙：2反射以上。キーパー・相手のキャッチ・空中のばらつきは含みません。<br>左右に移動して反射コースを作り、飛んでくる位置に合わせてキャッチ。上段パネルはゆっくり往復します。<br>得点後は負けている側が所持して再開（同点は失点側）。7秒超過でディスクは相手陣地へ。ハーフラインは越えられません。キャッチ直後の反撃と、壁キック後の空中投球は強化されます。</p></details>
         <details class="menuDetails"><summary>設定</summary><div class="settings">
           <label>画質 <select id="optQuality"><option value="low">最軽量</option><option value="balanced">軽量（推奨）</option><option value="high">高画質</option></select></label>
           <label>CPUの強さ <select id="optCpu"><option value="EASY">EASY</option><option value="NORMAL" selected>NORMAL</option><option value="HARD">HARD</option></select></label>
@@ -124,12 +125,12 @@
       <button id="rematch" class="primary">もう一度</button>
       <button id="toTitle">メニューへ</button>
     </div>
-    <p class="ver">RICOCHET v2.9.8 · CPU戦 / ONLINE 1v1 · 楕円9.6×2.5m / コート24m</p>
+    <p class="ver">RICOCHET v2.9.9 · CPU戦 / ONLINE 1v1 · 楕円9.6×2.5m / コート24m</p>
   </div>
 </div>
 <div id="rotate">横画面にしてプレイしてください<br><small>Rotate to landscape</small></div>
 <div id="countdown"></div>
 <script src="online-config.js"></script>
-<script src="ricochet.js?v=2.9.8"></script>
+<script src="ricochet.js?v=2.9.9"></script>
 </body>
 </html>

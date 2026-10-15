@@ -16,8 +16,8 @@ const assert=require('node:assert/strict');
   while(m.state==='goal')m.step(1/120);
   const conceded=scorer==='cyan'?'pink':'cyan',p=m.disc.pos;
   assert.ok((conceded==='cyan'?-1:1)*p.x>2,'restart must be in conceding half');
-  assert.ok(Math.abs(p.z)<ROOM.W-1);assert.ok(p.y>-ROOM.L&&p.y<-ROOM.L+1);
-  assert.equal(m.disc.state,'NEUTRAL');assert.equal(m.disc.owner,null);
+  assert.ok(Math.abs(p.z)<ROOM.W-1);
+  assert.equal(m.disc.state,'HELD');assert.equal(m.disc.owner,conceded==='cyan'?'player':'cpu');
  }
  const m=new MatchSimulation();m.state='playing';const k=m.keepers.find(k=>k.team==='cyan');
  m.athletes.cyan.pos.copy(k.feet());const before=m.athletes.cyan.pos.clone();m.step(1/120);
