@@ -1,4 +1,5 @@
 import {QUALITY_PROFILES,readQuality} from './quality.js';
+import {placeRestartDisc} from './restart.js';
 import {TrajectoryVolume} from './trajectory-volume.js';
 import {OnlineSession} from './online.js';
 import {shotParameters} from './shot.js';
@@ -41,7 +42,7 @@ export class Game {
     this.state = 'title';
     this.score = { cyan: 0, pink: 0 };
     this.timeLeft = C.MATCH_TIME; this.matchClock = 0; this.simTime = 0;
-    this.stats = this.freshStats();
+    this.stats = this.freshStats(); this.restartTeam=null;
     this.banner = null; this.bannerTimer = 0;
     this.hitstop = 0; this.goalTimer = 0; this.countT = 0;
     this.hype = 0.15; this.teamFlash = { cyan: 0, pink: 0 };
@@ -205,7 +206,7 @@ export class Game {
   resetMatch(countdown = true) {
     this.score.cyan = 0; this.score.pink = 0;
     this.timeLeft = C.MATCH_TIME; this.matchClock = 0; this.simTime = 0; updatePanelColliders(this.disc.panels,0);
-    this.stats = this.freshStats();
+    this.stats = this.freshStats(); this.restartTeam=null;
     this.gravity.reset(); this.gravity.endAt = C.MATCH_TIME; this.goals._k = null;
     this.rehomeKeepers(false);
     this.resetPositions();
@@ -221,12 +222,12 @@ export class Game {
     this.arena.setActiveGoals(act);
     this.arena.setHalfLine(this.gravity.teamDir('cyan'), this.gravity.floorDir(), this.gravity.halfLineActive);
   }
-  resetPositions() {
+  resetPositions(restartTeam = null) {
     this.guideFrame=-99;
     const up = this.up();
     this.player.reset(this.spawnPos('cyan'), up); this.player.yaw = -Math.PI / 2; this.player.pitch = -0.05;
     this.cpuA.reset(this.spawnPos('pink'), up); this.cpu.reset(); this.cpu.facingDir = this.gravity.teamDir('cyan');
-    this.disc.reset(); this.trail.reset(); this.input.clearPresses(); this.suction = null;
+    this.disc.reset(); if(restartTeam)placeRestartDisc(this.disc,restartTeam,this.rng); this.trail.reset(); this.input.clearPresses(); this.suction = null;
     this.lastOkCatchT = -99; this.catchFlightId = null; this.firstCatchT = -99;
     this.player.wallShotUntil = -99;
     this.player.chargeStart = null; this.player.curve = 0;
@@ -280,7 +281,7 @@ export class Game {
 
   // ---------------------------------------------------------------- main loop
   frame(t) {
-    const resting=(!this.online&&['title','paused','ended'].includes(this.state))||!!(this.online&&(!this.online.latest||this.online.latest.status==='waiting'||this.online.localPaused));
+    const resting=(!this.online&&['title','paused','ended'].includes(this.state))||!!(this.online&&(!this.online.latest||['waiting','ended','aborted','reconnecting'].includes(this.online.latest.status)||this.online.localPaused));
     if(resting&&this.lastMenuFrame!=null&&t-this.lastMenuFrame<1000/this.qualityProfile.menuFps){this.last=t;requestAnimationFrame(tt=>this.frame(tt));return;}
     if(resting)this.lastMenuFrame=t;
     const dtReal = Math.min(0.1, (t - this.last) / 1000); this.last = t;
@@ -326,7 +327,7 @@ export class Game {
       for (const k of this.keepers) k.update(0, this.matchClock);
       this.applyLook(); this.syncRoom(); this.syncCamera(h);
       if (this.goalTimer <= 0 && !this.gravity.rotating) {
-        this.resetPositions();
+        this.resetPositions(this.restartTeam); this.restartTeam=null;
         if (this.timeLeft <= 0) { this.endMatch(); return; }
         this.state = 'playing'; this.ui.callout('READY', '', 'cyan', 0.8);
       }
@@ -364,7 +365,7 @@ export class Game {
   flatRight(out = new THREE.Vector3()) { const p = this.player; return this.gravity.toRoomDir(_v4.set(Math.cos(p.yaw), 0, -Math.sin(p.yaw)), out); }
 
   envFor(a, other) {
-    return { up: this.up(), halfLine: { dir: this.gravity.teamDir(a.team), on: this.gravity.halfLineActive }, others: [{ pos: other.pos }, ...this.keepers.map(k => ({ pos: k.feet(), r: 0.55 }))] };
+    return { up: this.up(), halfLine: { dir: this.gravity.teamDir(a.team), on: this.gravity.halfLineActive }, others: [{ pos: other.pos }, ] };
   }
 
   onWallKick(a, who) {
@@ -692,7 +693,7 @@ export class Game {
     if (team === 'pink') { this.cpuChar.play('celebrate', 1.6, 10); this.cpuChar.setExpression('shoot', 1.8); this.stats.cpuGoals++; }
     else { this.cpuChar.play('conceded', 1.6, 8); this.cpuChar.setExpression('conceded', 2.2); this.stats.goals++; this.stats.points[e.value]++; }
     this.player.holding = false; this.cpuA.holding = false;
-    this.state = 'goal'; this.goalTimer = 2.4;
+    this.restartTeam=goalTeam; this.state = 'goal'; this.goalTimer = 2.4;
     this.bus.emit('GOAL_SCORED', { team, goalTeam, value: e.value, bounces: e.bounces, own, mouth: e.mouth.id });
   }
 
@@ -730,7 +731,7 @@ export class Game {
     const p=this.player;
     this.shotGuide.visible=this.state==='playing'&&p.holding;
     if(!this.shotGuide.visible)return;
-    if(this.guideFrame && this.simTime>=this.guideFrame && this.simTime-this.guideFrame<1/30)return;
+    if(this.guideFrame && this.simTime>=this.guideFrame && this.simTime-this.guideFrame<1/this.qualityProfile.guideHz)return;
     this.guideFrame=this.simTime;
     const eye=p.eye(),fwd=this.forward(new THREE.Vector3()),up=this.up(new THREE.Vector3());
     const origin=eye.clone().addScaledVector(fwd,.7).addScaledVector(this.flatRight(new THREE.Vector3()),.2).addScaledVector(up,-.15);

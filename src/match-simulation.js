@@ -8,6 +8,7 @@ import {KeeperPhysics} from './keeper-physics.js';
 import {evalCatch} from './catch.js';
 import {shotParameters} from './shot.js';
 import {Rng} from './rng.js';
+import {placeRestartDisc} from './restart.js';
 const teams=['cyan','pink'],who=t=>t==='cyan'?'player':'cpu',teamOf=w=>w==='player'?'cyan':w==='cpu'?'pink':null;
 export class MatchSimulation {
   constructor({seed=20261014}={}){
@@ -17,9 +18,9 @@ export class MatchSimulation {
     this.inputs={};this.queues={cyan:[],pink:[]};this.seq={cyan:-1,pink:-1};this.lastInputT={cyan:0,pink:0};
     this.score={cyan:0,pink:0};this.timeLeft=C.MATCH_TIME;this.simTime=0;this.matchClock=0;this.state='waiting';this.events=[];this.eventSeq=0;this.resetPositions();
   }
-  resetPositions(){
+  resetPositions(restartTeam=null){
     for(const team of teams){const a=this.athletes[team];a.reset(new THREE.Vector3(team==='cyan'?-C.SPAWN_DIST:C.SPAWN_DIST,-ROOM.L,0),new THREE.Vector3(0,1,0));a.yaw=team==='cyan'?-Math.PI/2:Math.PI/2;a.pitch=-.05;a.curve=0;a.chargeStart=null;a.justUntil=a.wallShotUntil=a.catchPressT=a.shotBufferedUntil=-99;a.lastOkCatchT=-99;a.catchFlightId=null;a.firstCatchT=-99;this.inputs[team]={yaw:a.yaw,pitch:a.pitch,moveX:0,moveY:0,curve:0};this.queues[team]=[];}
-    this.disc.reset();
+    this.disc.reset();if(restartTeam)placeRestartDisc(this.disc,restartTeam,this.rng);
   }
   start(){this.state='countdown';this.countT=0;}
   emit(type,data={}){this.events.push({id:++this.eventSeq,type,...data});if(this.events.length>24)this.events.shift();}
@@ -68,7 +69,7 @@ export class MatchSimulation {
     if(i.chargeCancel||!a.holding)a.chargeStart=null;if(i.chargeStart&&a.holding)a.chargeStart=this.simTime;
     if(i.chargeRelease&&a.chargeStart!=null&&a.holding)this.shoot(team);
     if(i.shoot){a.shotBufferedUntil=this.simTime+CATCH.shotBuffer;this.shoot(team);}
-    const ev=a.step(dt,wish,{up:new THREE.Vector3(0,1,0),halfLine:{dir:this.gravity.teamDir(team),on:true},others:[{pos:other.pos},...this.keepers.map(k=>({pos:k.feet(),r:.55}))]});
+    const ev=a.step(dt,wish,{up:new THREE.Vector3(0,1,0),halfLine:{dir:this.gravity.teamDir(team),on:true},others:[{pos:other.pos},]});
     if(ev.some(e=>e.type==='land'))a.wallShotUntil=-99;
     if(a.catchWindow>0){a.catchWindow-=dt;a.catchWindowAge+=dt;if(a.catchWindow<=0&&!a.holding)a.catchCd=CATCH.cooldown;}
     if(a.holding&&a.holdTime>C.HOLD_LIMIT){a.holding=false;a.chargeStart=null;a.noPickup=1;this.disc.drop();}
@@ -79,7 +80,7 @@ export class MatchSimulation {
     if(this.state==='waiting'||this.state==='ended')return;
     this.simTime+=dt;updatePanelColliders(this.disc.panels,this.simTime);
     if(this.state==='countdown'){this.countT+=dt;if(this.countT>=2.1)this.state='playing';return;}
-    if(this.state==='goal'){this.goalTimer-=dt;if(this.goalTimer<=0){this.resetPositions();this.state='playing';}return;}
+    if(this.state==='goal'){this.goalTimer-=dt;if(this.goalTimer<=0){this.resetPositions(this.restartTeam);this.restartTeam=null;this.state='playing';}return;}
     this.timeLeft=Math.max(0,this.timeLeft-dt);this.matchClock+=dt;if(!this.timeLeft){this.state='ended';this.clearInputs();this.emit('ended');return;}
     for(const k of this.keepers)k.update(dt,this.matchClock);
     for(const t of teams)this.move(t,dt);
@@ -89,7 +90,7 @@ export class MatchSimulation {
     else {d.stepOther(dt,events);if(d.state==='NEUTRAL'||d.state==='LOOSE')this.pickups();}
     for(const t of teams){if(d.state==='FLYING'&&this.catchEval(t).ok)this.recordCatchZone(t);}
     for(const e of events){
-      if(e.type==='goal'){const team=e.scorer==='player'?'cyan':'pink';this.score[team]+=e.value;this.state='goal';this.goalTimer=2.4;for(const t of teams)this.athletes[t].holding=false;this.emit('goal',{team,value:e.value,point:e.point.toArray()});}
+      if(e.type==='goal'){const team=e.scorer==='player'?'cyan':'pink';this.score[team]+=e.value;this.restartTeam=team==='cyan'?'pink':'cyan';this.state='goal';this.goalTimer=2.4;for(const t of teams)this.athletes[t].holding=false;this.emit('goal',{team,value:e.value,point:e.point.toArray()});}
       else if(e.type==='bounce')this.emit('bounce',{count:e.count,surface:e.surface,point:e.point.toArray()});
       else if(e.type==='save')this.emit('save',{team:e.keeper.team,point:e.point.toArray(),lat:e.lat});
     }

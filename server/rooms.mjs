@@ -22,9 +22,11 @@ export class Rooms {
     const r=ws.room;if(!r)return this.error(ws,'join-first');if(r.slots[ws.team]?.ws!==ws)return;
     if(message.type==='ready'){if(r.status!=='waiting')return;r.slots[ws.team].ready=true;if(teams.every(t=>r.slots[t]?.ready&&r.slots[t]?.ws)){r.status='active';r.match.start();}this.broadcast(r);}
     else if(message.type==='rematch'){
-      if(r.status!=='ended'||!teams.every(t=>r.slots[t]?.ws))return;
+      if(r.status!=='ended')return this.error(ws,'rematch-unavailable');
+      if(r.finishedAt&&Date.now()-r.finishedAt>=60000)return this.error(ws,'expired');
+      if(teams.some(t=>!r.slots[t]||(!r.slots[t].ws&&r.slots[t].deadline<=Date.now())))return this.error(ws,'expired');
       r.slots[ws.team].rematch=true;
-      if(teams.every(t=>r.slots[t].rematch)){r.match=new MatchSimulation();r.round++;r.finishedAt=null;r.status='active';for(const t of teams){r.slots[t].rematch=false;r.slots[t].ready=true;}r.match.start();}
+      if(teams.every(t=>r.slots[t].rematch&&r.slots[t].ws)){r.match=new MatchSimulation();r.round++;r.finishedAt=null;r.status='active';for(const t of teams){r.slots[t].rematch=false;r.slots[t].ready=true;}r.match.start();}
       this.broadcast(r);
     }
     else if(message.type==='input'){if(!validInput(message.input))return this.error(ws,'input');if(r.status==='active'&&r.match.state==='playing')r.match.applyInput(ws.team,message.input);}
@@ -33,14 +35,14 @@ export class Rooms {
     else this.error(ws,'message');
   }
   disconnect(ws,leave=false){
-    const r=ws.room,team=ws.team;if(!r||r.slots[team]?.ws!==ws)return;r.slots[team].ws=null;r.slots[team].deadline=Date.now()+this.reconnectMs;r.match.clearInputs();
+    const r=ws.room,team=ws.team;if(!r||r.slots[team]?.ws!==ws)return;r.slots[team].ws=null;r.slots[team].deadline=Date.now()+this.reconnectMs;r.match.clearInputs();for(const t of teams)if(r.slots[t])r.slots[t].rematch=false;
     if(leave){r.reason='opponent-left';r.status='aborted';r.finishedAt=Date.now();}
     else if(r.status!=='reconnecting'&&r.status!=='aborted'&&r.status!=='ended'){r.beforeDisconnect=r.status;r.status='reconnecting';}
     this.broadcast(r);
   }
   advance(dt){
     const now=Date.now();for(const [name,r] of this.rooms){
-      if(teams.some(t=>r.slots[t]&&!r.slots[t].ws&&r.slots[t].deadline<=now)&&!['ended','aborted'].includes(r.status)){r.status='aborted';r.finishedAt=now;this.broadcast(r);}
+      if(teams.some(t=>r.slots[t]&&!r.slots[t].ws&&r.slots[t].deadline<=now)&&r.status!=='aborted'){r.status='aborted';r.finishedAt=now;this.broadcast(r);}
       if(r.status==='active'){r.match.step(dt);if(r.match.state==='ended'){r.status='ended';r.finishedAt=now;}}
       if((r.finishedAt&&now-r.finishedAt>60000)||(r.status==='waiting'&&now-r.created>300000)){for(const t of teams)r.slots[t]?.ws?.close(1000,'room expired');this.rooms.delete(name);}
     }

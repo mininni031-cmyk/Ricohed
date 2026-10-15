@@ -1,17 +1,11 @@
-// Actual prebuilt client physics regression, independent of npm dependencies.
+// Shared source physics regression; shipped browser behavior is covered by browser suites.
 // The test instruments a COPY of the bundled file in a Node sandbox; nothing is
 // injected into the shipped bundle. Run with: node tests/side-reflection-v295.cjs
 const fs=require('node:fs'), path=require('node:path'), vm=require('node:vm');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const script=fs.readFileSync(path.join(root,'ricochet.js'),'utf8');
-const roomSymbol=script.match(/([A-Za-z_$][\w$]*)=\{L:11,W:12,CENTER_Y:/)?.[1];
-assert.ok(roomSymbol,'compiled room configuration must be present');
-const instrumented=script.replace('function Ey(r){',`globalThis.TEST_API={THREE:Le,ROOM:${roomSymbol},CONFIG:Dt,CATCH:De,PANELS:Yo,DiscPhysics:Ko};function Ey(r){`);
-assert.notEqual(script,instrumented,'Failed to locate bundle export point; do not silently pass');
-const sandbox={window:{addEventListener(){}},document:{readyState:'loading',addEventListener(){}},console,AbortController,EventTarget,URL,URLSearchParams};
-vm.runInNewContext(instrumented,sandbox,{timeout:10000});
-const {THREE:T,ROOM,CONFIG:C,CATCH,PANELS,DiscPhysics:Disc}=sandbox.TEST_API;
+const load=require('./load.cjs');
+const {THREE:T,ROOM,CONFIG:C,CATCH,PANELS,DiscPhysics:Disc}=load(`export * as THREE from 'three'; export {ROOM,CONFIG,CATCH,PANELS} from './src/config.js'; export {DiscPhysics} from './src/physics.js';`);
 const vec=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 function shoot(side,dir,originZ=0,originY=-ROOM.L+C.GOAL_Y){
  const goal={id:'test',center:vec(side<0?ROOM.L:-ROOM.L,-ROOM.L+C.GOAL_Y,0),normal:vec(-side,0,0),up:vec(0,1,0)};
@@ -58,7 +52,7 @@ test('four true side-wall bank shots score without extra panel hits',()=>{
 });
 // 4. Gameplay rules other than arena horizontal geometry are unchanged.
 test('catch, goal, ceiling and online match physics constants preserved',()=>{
- assert.equal(C.VERSION,'2.9.6');assert.equal(ROOM.CEILING_Y+ROOM.L,6.8);
+ assert.equal(C.VERSION,'2.9.7');assert.equal(ROOM.CEILING_Y+ROOM.L,6.8);
  assert.equal(C.GOAL_A,12/2.5);assert.equal(C.GOAL_B,1.25);
  assert.equal(C.MATCH_TIME,180);assert.equal(C.SIM_STEP,1/120);
  assert.equal(C.SHOT_SPEED,16);
@@ -71,7 +65,7 @@ test('source and static bundle are in sync',()=>{
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const pkg=require(path.join(root,'package.json'));
  assert.equal(pkg.version,C.VERSION);assert.ok(html.includes(`ricochet.js?v=${C.VERSION}`));
- assert.ok(html.includes('コート24m'));assert.ok(source.includes("VERSION: '2.9.6'"));
+ assert.ok(html.includes('コート24m'));assert.ok(source.includes("VERSION: '2.9.7'"));
  assert.ok(/W: 12,/.test(source));
  for(const p of PANELS)assert.ok(source.includes(`id: '${p.id}'`));
 });
