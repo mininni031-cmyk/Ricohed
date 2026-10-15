@@ -1,6 +1,6 @@
 # GitHub・Cloudflare Pages・Renderで公開する
 
-ゲーム画面はCloudflare Pages、対戦判定はRenderのWebSocketサービス、ソースはGitHubに置きます。この成果物はまだ外部公開していません。
+本番のゲーム画面はCloudflareのricohed Worker（https://ricohed.mininni-games.com/）、対戦判定はRender（https://ricochet-ws.onrender.com）、ソースはGitHub mininni031-cmyk/Ricohedです。ゲームだけのdistをricohedへ公開し、mininni-gamesサイト本体やDANGO・LUMENへアップロードしないでください。以下のPages手順は別の公開先を使う場合の参考です。
 
 ## 1. ローカルで確認
 
@@ -42,7 +42,7 @@ RenderでGitHubリポジトリからWeb Serviceを作ります。Blueprintを利
 
 `ALLOWED_ORIGINS`はパスと末尾の`/`を含めません。複数ならカンマで区切ります。利用する独自ドメインも追加してください。CloudflareのプレビューURLを使う場合も、その実際のOriginを明示的に追加します。
 
-PORTはRenderが提供する値を使い、サーバーは0.0.0.0で待受します。公開後、`https://実際のサービス名.onrender.com/health`で`{"ok":true,"version":"2.9.1"}`が返ることを確認します。
+PORTはRenderが提供する値を使い、サーバーは0.0.0.0で待受します。公開後、`https://実際のサービス名.onrender.com/health`で`{"ok":true,"version":"2.9.5"}`が返ることを確認します。
 
 ゲーム画面からの接続先は`wss://実際のサービス名.onrender.com/ws`です。サービス名はRenderで発行されたURLを使い、例の名前をそのまま使わないでください。
 

@@ -6,3 +6,5 @@ core.cjs（楕円・ステージ・得点・角度）、shot.cjs（強化と予�
 run_v27*、run_v28*、旧results.json、balance、compare_goalsは過去版の検証履歴です。v2.9の固定楕円・速度・コート値への対応を保証していないため、現在の全件合格判定には用いません。
 
 review-regressions.cjsはレビュー指摘4点とサーバー再起動時の中断表示、long-match.cjsは最新仕様の3分CPU戦を終了まで確認します。test:packageはCloudflare用公開出力を確認します。
+
+`npm run test:side` は外部依存パッケージ不要。実際の配信用 `ricochet.js` からパネル4経路・側壁4経路・旧仕様の維持・ソース整合性を確認します（5カテゴリ）。

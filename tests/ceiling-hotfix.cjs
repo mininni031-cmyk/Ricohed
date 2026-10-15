@@ -65,7 +65,7 @@ run('3. Disc ceiling collision and downward bounce',()=>{
 run('4. Panel spacing and collider orientation consistency',()=>{
  const panels=R.buildPanelColliders();assert.equal(panels.length,6);
  assert.equal(new Set(panels.map(p=>p.id)).size,6);
- for(const p of panels){assert.ok(Math.abs(p.center.z)>=8.5-1e-7,`${p.id} too close to centre`);assert.ok(Math.abs(p.center.x)<=R.ROOM.L,'outside wall');const real=p.definition;assert.equal(p.center.y,real.pos[1]);assert.equal(p.center.z,real.pos[2]);assert.equal(p.q.lengthSq()>0,true);}
+ for(const p of panels){assert.ok(Math.abs(p.center.z)>=6.5-1e-7,`${p.id} too close to centre`);assert.ok(Math.abs(p.center.x)<=R.ROOM.L,'outside wall');const real=p.definition;assert.equal(p.center.y,real.pos[1]);assert.equal(p.center.z,real.pos[2]);assert.equal(p.q.lengthSq()>0,true);}
  const cyan=panels.filter(p=>p.team==='cyan'),pink=panels.filter(p=>p.team==='pink');assert.equal(cyan.length,3);assert.equal(pink.length,3);
  assert.ok(cyan.some(p=>p.center.z>0)&&cyan.some(p=>p.center.z<0));
  assert.ok(pink.some(p=>p.center.z>0)&&pink.some(p=>p.center.z<0));

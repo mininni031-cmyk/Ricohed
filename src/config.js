@@ -12,7 +12,7 @@
 
 export const ROOM = {
   L: 11,             // half size in x and y  -> 22 m x 22 m cross-section
-  W: 14,             // half size in z        -> 24 m wide (trial wider arena)
+  W: 12,             // half size in z        -> 24 m court (shorter lateral rebounds)
   CENTER_Y: 16,      // world height of the room centre (resting floor at world y = 5)
   CEILING_Y: -4.2,   // floor y=-11 => 6.8 m clear height; tighter vertical play
 };
@@ -57,7 +57,7 @@ export const GOAL_SCALE = 1;
 
 export const CONFIG = {
   GOAL_SCALE,
-  VERSION: '2.9.4',
+  VERSION: '2.9.5',
   MATCH_TIME: 180,
   SIM_STEP: 1 / 120,          // fixed simulation step (deterministic, frame-rate independent)
 
@@ -144,14 +144,14 @@ export function cpuCfg() { return CPU_PRESETS[CONFIG.CPU] || CPU_PRESETS.NORMAL;
 // Cyan goal at -X; pink goal at +X. Leave more lateral room between panels.
 export const PANEL_LAYOUT = {
   cyan: [
-    { id: 'C1', role: '左上・自陣ゴール反射', pos: [-5.5, -6.15, -8.5], size: [2.56, 1.44, 0.16], rotY: -42, motion: { amplitude: 1.0, period: 8, sign: 1 } },
-    { id: 'C2', role: '左サイド・自陣ゴール反射', pos: [-5.5, -8.85, -8.5], size: [2.72, 1.28, 0.16], rotY: -32 },
-    { id: 'C3', role: '右サイド・自陣ゴール反射', pos: [-5.5, -8.85, 8.5], size: [2.72, 1.28, 0.16], rotY: 32 },
+    { id: 'C1', role: '左上・自陣ゴール反射', pos: [-5.5, -6.15, -6.5], size: [2.56, 1.44, 0.16], rotY: -42, motion: { amplitude: 1.0, period: 8, sign: 1 } },
+    { id: 'C2', role: '左サイド・自陣ゴール反射', pos: [-5.5, -8.85, -6.5], size: [2.72, 1.28, 0.16], rotY: 11 },
+    { id: 'C3', role: '右サイド・自陣ゴール反射', pos: [-5.5, -8.85, 6.5], size: [2.72, 1.28, 0.16], rotY: -11 },
   ],
   pink: [
-    { id: 'K1', role: '右上・自陣ゴール反射', pos: [5.5, -6.15, 8.5], size: [2.56, 1.44, 0.16], rotY: -42, motion: { amplitude: 1.0, period: 8, sign: -1 } },
-    { id: 'K2', role: '右サイド・自陣ゴール反射', pos: [5.5, -8.85, 8.5], size: [2.72, 1.28, 0.16], rotY: -32 },
-    { id: 'K3', role: '左サイド・自陣ゴール反射', pos: [5.5, -8.85, -8.5], size: [2.72, 1.28, 0.16], rotY: 32 },
+    { id: 'K1', role: '右上・自陣ゴール反射', pos: [5.5, -6.15, 6.5], size: [2.56, 1.44, 0.16], rotY: -42, motion: { amplitude: 1.0, period: 8, sign: -1 } },
+    { id: 'K2', role: '右サイド・自陣ゴール反射', pos: [5.5, -8.85, 6.5], size: [2.72, 1.28, 0.16], rotY: 11 },
+    { id: 'K3', role: '左サイド・自陣ゴール反射', pos: [5.5, -8.85, -6.5], size: [2.72, 1.28, 0.16], rotY: -11 },
   ],
 };
 export const PANELS = Object.entries(PANEL_LAYOUT).flatMap(([team, list]) => list.map(p => ({ ...p, team })));
