@@ -747,7 +747,7 @@ export class Game {
     this.shotGuide.geometry.setDrawRange(0,result.points.length);this.shotGuide.material.vertexColors=true;this.shotGuide.material.color.set(0xffffff);this.shotGuide.computeLineDistances();this.guideVolume.setPath(result.points,colors);
   }
 
-  updateVisuals(dt, live) {
+  updateVisuals(dt, live, roomSynced = false) {
     const t = this.simTime;
     this.fovKick = Math.max(0, this.fovKick - dt * 30);
     const dashing = this.player.dashTime > 0;
@@ -756,7 +756,7 @@ export class Game {
     this.camera.fov += (targetFov - this.camera.fov) * Math.min(1, dt * 14);
     this.camera.updateProjectionMatrix();
     this.shake = Math.max(0, this.shake - dt);
-    this.syncRoom();
+    if(!roomSynced)this.syncRoom();
     if (!live) this.syncCamera(0);
     if (this.shake > 0 && live && !this.settings.reduceMotion) {
       const s = this.shake * 0.08;

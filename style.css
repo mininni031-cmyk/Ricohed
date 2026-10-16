@@ -285,3 +285,5 @@ body.reduce-motion #fx-speed{display:none}
 
 #tCurveControl{position:absolute;right:calc(184px + var(--safe-r));bottom:176px;width:136px;pointer-events:auto;background:#071b32df;border-radius:10px;padding:6px 8px;font:11px system-ui;text-align:center;color:#ffe477;touch-action:none}#tCurveControl span{display:block;margin-bottom:3px}#tCurveSlider{width:100%;margin:0;accent-color:#ffe477;touch-action:none}
 @media(max-height:450px){#tCurveControl{bottom:172px;width:118px;padding:4px 6px}}
+
+#netWarning{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:8;padding:7px 14px;border-radius:8px;background:#5c340fdf;color:#ffe8b8;font:12px system-ui;pointer-events:none}#netWarning[hidden]{display:none}

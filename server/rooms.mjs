@@ -3,7 +3,7 @@ import {MatchSimulation} from '../src/match-simulation.js';
 import {validInput,roomName} from './protocol.mjs';
 const teams=['cyan','pink'];
 export class Rooms {
-  constructor({reconnectMs=30000,maxRooms=200}={}){this.rooms=new Map();this.reconnectMs=reconnectMs;this.maxRooms=maxRooms;}
+  constructor({reconnectMs=30000,maxRooms=200}={}){this.transport={sentStates:0,droppedStates:0,encodedStates:0};this.rooms=new Map();this.reconnectMs=reconnectMs;this.maxRooms=maxRooms;}
   send(ws,msg){if(ws?.readyState!==1)return;if(ws.bufferedAmount>262144){ws.close(1013,'slow connection');return;}ws.send(JSON.stringify(msg));}
   error(ws,code){this.send(ws,{type:'error',code});}
   join(ws,message){
@@ -47,5 +47,9 @@ export class Rooms {
       if((r.finishedAt&&now-r.finishedAt>60000)||(r.status==='waiting'&&now-r.created>300000)){for(const t of teams)r.slots[t]?.ws?.close(1000,'room expired');this.rooms.delete(name);}
     }
   }
-  broadcast(r){const msg={type:'state',status:r.status,round:r.round,reason:r.reason||null,rematch:Object.fromEntries(teams.map(t=>[t,!!r.slots[t]?.rematch])),ready:Object.fromEntries(teams.map(t=>[t,!!r.slots[t]?.ready])),connected:Object.fromEntries(teams.map(t=>[t,!!r.slots[t]?.ws])),reconnectDeadline:Math.min(...teams.filter(t=>r.slots[t]?.deadline).map(t=>r.slots[t].deadline)),snapshot:r.match.snapshot()};for(const t of teams)this.send(r.slots[t]?.ws,msg);}
+  broadcast(r){
+    const recipients=teams.map(t=>r.slots[t]?.ws).filter(ws=>ws?.readyState===1);
+    const writable=recipients.filter(ws=>{if(ws.bufferedAmount>262144){ws.close(1013,'slow connection');this.transport.droppedStates++;return false;}if(ws.bufferedAmount>65536){this.transport.droppedStates++;return false;}return true;});
+    if(!writable.length)return;
+    const msg={type:'state',status:r.status,round:r.round,reason:r.reason||null,rematch:Object.fromEntries(teams.map(t=>[t,!!r.slots[t]?.rematch])),ready:Object.fromEntries(teams.map(t=>[t,!!r.slots[t]?.ready])),connected:Object.fromEntries(teams.map(t=>[t,!!r.slots[t]?.ws])),reconnectDeadline:Math.min(...teams.filter(t=>r.slots[t]?.deadline).map(t=>r.slots[t].deadline)),snapshot:r.match.snapshot()};const encoded=JSON.stringify(msg);this.transport.encodedStates++;for(const ws of writable){ws.send(encoded);this.transport.sentStates++;}}
 }

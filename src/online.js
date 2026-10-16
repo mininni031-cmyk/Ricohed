@@ -1,11 +1,14 @@
+import {MovementPredictor} from './movement-predictor.js';
 import {applyCurveControls} from './curve-controls.js';
 import * as THREE from 'three';
 import {updatePanelColliders} from './physics.js';
 const errors={full:'この部屋は満員です。別の合言葉を使ってください。',room:'合言葉は4〜48文字で入力してください。',expired:'再接続期限が過ぎたか、サーバーが再起動しました。',ended:'この部屋の試合は終了しています。新しい合言葉を使ってください。',capacity:'サーバーが混み合っています。少し待ってください。',input:'操作データが拒否されました。',json:'通信データを読み取れませんでした。'};
 export function validateServerUrl(value){const u=new URL(value);if(!['ws:','wss:'].includes(u.protocol)||u.username||u.password)throw Error('ws:// または wss:// のサーバーURLを入力してください。');if(location.protocol==='https:'&&u.protocol!=='wss:')throw Error('公開サイトでは wss:// のURLを使ってください。');return u.href;}
 export class OnlineSession {
-  constructor(game,{url,room}){this.g=game;this.url=validateServerUrl(url);this.room=room;this.team=null;this.token=null;this.seq=0;this.acc=0;this.eventId=0;this.latest=null;this.previous=null;this.intentional=false;this.localPaused=false;this.lastPing=0;this.latency=0;this.connected=false;game.guideFrame=-99;}
-  status(text){for(const id of ['netStatus','netHud']){const el=document.getElementById(id);if(el)el.textContent=text;}}
+  constructor(game,{url,room}){this.g=game;this.url=validateServerUrl(url);this.room=room;this.team=null;this.token=null;this.seq=0;this.acc=0;this.eventId=0;this.latest=null;this.previous=null;this.intentional=false;this.localPaused=false;this.lastPing=0;this.latency=0;this.connected=false;this.sentInputs=new Map();this.diagnostics={rttMs:0,inputAckMs:0,receiveAgeMs:0,frameMs:0,pendingInputs:0};game.guideFrame=-99;}
+  status(text){for(const id of ['netStatus','netHud']){const el=document.getElementById(id);if(el&&el.textContent!==text)el.textContent=text;}}
+  resetPrediction(){const warning=document.getElementById('netWarning');if(warning)warning.hidden=true;this.predictor?.clear();this.sentInputs.clear();this.predictionSnapshot=null;this.wasPredicting=false;}
+  noteState(m){const ack=m.snapshot?.athletes?.[this.team]?.ack,now=performance.now();if(this.sentInputs.has(ack))this.diagnostics.inputAckMs=now-this.sentInputs.get(ack);for(const seq of this.sentInputs.keys())if(seq<=ack)this.sentInputs.delete(seq);}
   connect(){
     this.connected=false;
     this.status(this.token?'再接続しています…':'接続しています…（初回起動には時間がかかる場合があります）');
@@ -14,7 +17,7 @@ export class OnlineSession {
     ws.onopen=()=>{clearTimeout(timeout);this.send({type:'join',room:this.room,...(this.token?{token:this.token}:{})});};
     ws.onmessage=e=>{let m;try{m=JSON.parse(e.data);}catch{return;}
       if(m.type==='joined'){this.connected=true;this.team=m.team;this.token=m.token;this.disconnectAt=null;document.getElementById('netReady').hidden=false;document.getElementById('netLeave').hidden=false;document.getElementById('netJoin').disabled=true;this.status('入室しました：TEAM '+m.team.toUpperCase()+'。両者が「準備完了」を押すと開始します。');}
-      else if(m.type==='state'){this.previous=this.latest;this.latest=m;this.receivedAt=performance.now();this.processState(m);}
+      else if(m.type==='state'){this.previous=this.latest;this.latest=m;this.receivedAt=performance.now();this.noteState(m);this.processState(m);}
       else if(m.type==='pong')this.latency=Math.max(0,Math.round(performance.now()-m.sent));
       else if(m.type==='error'){this.status(errors[m.code]||'接続に失敗しました。');if(['full','room','expired','ended','capacity','join-first'].includes(m.code)){if(this.token&&this.latest)this.failRecovery(errors[m.code]||'試合が中断されました。');else{this.intentional=true;this.connected=false;ws.close();}document.getElementById('netJoin').disabled=false;}}
     };
@@ -46,7 +49,7 @@ export class OnlineSession {
     this.send({type:'rematch'});
   }
   ready(){this.send({type:'ready'});document.getElementById('netReady').disabled=true;this.status('準備完了。相手の準備を待っています…');}
-  clearControls(){const i=this.g.input;i.keys.clear();i.stick.x=i.stick.y=0;i.clearPresses();i.lookDX=i.lookDY=0;this.g.player.chargeStart=null;this.sendInput({chargeCancel:true},true);}
+  clearControls(){this.resetPrediction();const i=this.g.input;i.keys.clear();i.stick.x=i.stick.y=0;i.clearPresses();i.lookDX=i.lookDY=0;this.g.player.chargeStart=null;this.sendInput({chargeCancel:true},true);}
   pause(){if(['ended','aborted'].includes(this.latest?.status)){this.localPaused=false;this.g.input.enabled=false;this.g.ui.menu('menuResult');return;}this.localPaused=true;document.getElementById('restart').hidden=true;this.clearControls();this.g.input.enabled=false;this.g.input.exitLock();this.g.ui.menu('menuPause');this.status('操作を停止中です。オンラインの試合時間は進みます。');}
   resume(){if(['ended','aborted'].includes(this.latest?.status)){this.localPaused=false;this.g.input.enabled=false;this.g.ui.menu('menuResult');return;}this.localPaused=false;this.g.ui.menu(null);this.g.input.enabled=this.latest?.status==='active';this.g.input.requestLock();}
   leave(){
@@ -57,17 +60,17 @@ export class OnlineSession {
   processState(m){
     if(!this.team)return;
     const g=this.g,s=m.snapshot,other=this.team==='cyan'?'pink':'cyan';g.player.team=this.team;g.cpuA.team=other;
-    if(this.round!==m.round){this.clearRematchPending();this.rematchRetry=false;this.round=m.round;this.eventId=0;this.previous=null;this.resultShown=false;this.resultStatus=null;this.started=false;this.synced=false;this.localPaused=false;g.player.curve=s.athletes[this.team].curve;g.player.chargeStart=null;g.trail.reset();g.sparks.clear();g.ui.skipAnimations();g.guideFrame=-99;document.getElementById('rematch').disabled=false;}
+    if(this.round!==m.round){this.clearRematchPending();this.rematchRetry=false;this.round=m.round;this.resetPrediction();this.eventId=0;this.previous=null;this.resultShown=false;this.resultStatus=null;this.started=false;this.synced=false;this.localPaused=false;g.player.curve=s.athletes[this.team].curve;g.player.chargeStart=null;g.trail.reset();g.sparks.clear();g.ui.skipAnimations();g.guideFrame=-99;document.getElementById('rematch').disabled=false;}
     if(m.status!=='ended'||m.rematch?.[this.team])this.clearRematchPending();
     if(!this.synced){g.player.yaw=s.athletes[this.team].yaw;g.player.pitch=s.athletes[this.team].pitch;g.player.curve=s.athletes[this.team].curve;this.synced=true;}
-    document.querySelector('.team.cyan .tsub').textContent=this.team==='cyan'?'YOU':'相手';document.querySelector('.team.pink .tsub').textContent=this.team==='pink'?'YOU':'相手';document.querySelector('#playerCard .pname span').textContent='TEAM '+this.team.toUpperCase();
+    if(this.labelsTeam!==this.team){document.querySelector('.team.cyan .tsub').textContent=this.team==='cyan'?'YOU':'相手';document.querySelector('.team.pink .tsub').textContent=this.team==='pink'?'YOU':'相手';document.querySelector('#playerCard .pname span').textContent='TEAM '+this.team.toUpperCase();this.labelsTeam=this.team;}
     if(m.status==='active'){
       if(!this.started){this.started=true;this.clearControls();g.ui.menu(null);g.ui.showHUD(true);g.audio.startMusic();document.getElementById('netHud').hidden=false;document.getElementById('netExit').hidden=true;}
       g.input.enabled=!this.localPaused;
-      if(s.state==='countdown')g.ui.countdown(s.countT<.7?'3':s.countT<1.4?'2':'1');else g.ui.countdown(null);
+      const label=s.state==='countdown'?(s.countT<.7?'3':s.countT<1.4?'2':'1'):null;if(label!==this.countdownLabel){g.ui.countdown(label);this.countdownLabel=label;}
     }else if(m.status==='reconnecting'){g.input.enabled=false;g.ui.countdown(null);this.clearControls();this.status('相手または通信の復帰待ちです。試合を停止しています。');}
     else if(m.status==='waiting')this.status('TEAM '+this.team.toUpperCase()+'：'+(m.connected[other]?'相手が入室しています。準備完了を押してください。':'相手の入室待ちです。'));
-    if((m.status==='ended'||m.status==='aborted')&&(!this.resultShown||this.resultStatus!==m.status)){this.resultShown=true;this.resultStatus=m.status;g.state='ended';this.localPaused=false;g.input.enabled=false;g.input.exitLock();g.audio.stopMusic();g.ui.countdown(null);g.ui.menu('menuResult');
+    if((m.status==='ended'||m.status==='aborted')&&(!this.resultShown||this.resultStatus!==m.status)){this.resetPrediction();this.resultShown=true;this.resultStatus=m.status;g.state='ended';this.localPaused=false;g.input.enabled=false;g.input.exitLock();g.audio.stopMusic();g.ui.countdown(null);g.ui.menu('menuResult');
       const mine=s.score[this.team],theirs=s.score[other];document.getElementById('resultTitle').textContent=m.status==='aborted'?'試合中断':mine>theirs?'YOU WIN!':mine<theirs?'YOU LOSE':'DRAW';document.getElementById('resultScore').textContent=`CYAN ${s.score.cyan} — ${s.score.pink} PINK`;document.getElementById('resultStats').textContent=m.status==='aborted'?(m.reason==='opponent-left'?'相手が退出しました。':'再接続期限切れで終了しました。'):'双方が再戦を選ぶと、同じ部屋でもう一度遊べます。';document.getElementById('rematch').hidden=m.status==='aborted';document.getElementById('rematch').textContent='再戦する';this.status(m.status==='aborted'?'試合が中断されました。':'試合が終了しました。');}
     if(m.status==='ended')this.updateRematch(m);
     for(const e of s.events){if(e.id<=this.eventId)continue;this.eventId=e.id;
@@ -83,24 +86,37 @@ export class OnlineSession {
   sendInput(actions={},forceNeutral=false){
     if(!this.team||!this.connected||this.socket?.readyState!==WebSocket.OPEN)return;
     const g=this.g,p=g.player,ax=forceNeutral?{x:0,y:0}:g.input.axes();
-    this.send({type:'input',input:{seq:++this.seq,yaw:((p.yaw+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI,pitch:p.pitch,moveX:ax.x,moveY:ax.y,curve:p.curve||0,curveEpoch:this.latest?.snapshot?.athletes?.[this.team]?.curveEpoch||0,...actions}});
+    const seq=++this.seq;this.sentInputs.set(seq,performance.now());while(this.sentInputs.size>120)this.sentInputs.delete(this.sentInputs.keys().next().value);
+    this.send({type:'input',input:{seq,yaw:((p.yaw+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI,pitch:p.pitch,moveX:ax.x,moveY:ax.y,curve:p.curve||0,curveEpoch:this.latest?.snapshot?.athletes?.[this.team]?.curveEpoch||0,...actions}});
   }
   update(dt){
     const g=this.g,p=g.player,i=g.input,s=this.latest?.snapshot;
+    const now=performance.now(),age=this.receivedAt==null?0:now-this.receivedAt,fresh=age<1000;let predictedActions={},sentThisFrame=false;
     const active=this.connected&&this.socket?.readyState===WebSocket.OPEN&&this.latest?.status==='active';
     if(i.enabled){g.applyLook();applyCurveControls(p,i);}
-    this.acc+=dt;if(this.acc>=1/30){this.acc%=1/30;const actions={};for(const key of ['jump','dash','catch','shoot','chargeStart','chargeRelease','chargeCancel'])if(i.consume(key))actions[key]=true;this.sendInput(actions,!i.enabled||this.localPaused);}
+    this.acc+=dt;if(this.acc>=1/30){this.acc%=1/30;const actions={};for(const key of ['jump','dash','catch','shoot','chargeStart','chargeRelease','chargeCancel'])if(i.consume(key)&&fresh)actions[key]=true;predictedActions=actions;sentThisFrame=true;this.sendInput(actions,!i.enabled||this.localPaused||!fresh);}
     if(performance.now()-this.lastPing>2000){this.lastPing=performance.now();this.send({type:'ping',sent:this.lastPing});}
     if(!s)return;
     const other=this.team==='cyan'?'pink':'cyan',alpha=Math.max(0,Math.min(1,(performance.now()-this.receivedAt)/50));
-    const interpolate=(target,key,values,prev)=>{target[key].fromArray(values);if(prev&&new THREE.Vector3(...values).distanceTo(new THREE.Vector3(...prev))<2)target[key].fromArray(prev).lerp(new THREE.Vector3(...values),alpha);};
+    const interpolate=(target,key,values,prev)=>{const v=target[key];if(prev&&Math.hypot(values[0]-prev[0],values[1]-prev[1],values[2]-prev[2])<2)v.set(prev[0]+(values[0]-prev[0])*alpha,prev[1]+(values[1]-prev[1])*alpha,prev[2]+(values[2]-prev[2])*alpha);else v.fromArray(values);};
     for(const [team,a] of [[this.team,p],[other,g.cpuA]]){const v=s.athletes[team],old=this.previous?.snapshot?.athletes[team];interpolate(a,'pos',v.pos,old?.pos);a.vel.fromArray(v.vel);for(const k of ['grounded','holding','holdTime','airJumps','wallKicks','catchWindow','catchCd','dashCd','dashTime','justUntil','wallShotUntil','chargeStart'])a[k]=v[k];if(team!==this.team){a.yaw=v.yaw;a.pitch=v.pitch;a.curve=v.curve;}a.up.set(0,1,0);}
+    const predicting=active&&!this.localPaused&&s.state==='playing';
+    if(predicting){
+      this.predictor??=new MovementPredictor(this.team);
+      if(this.predictionSnapshot!==s){this.predictor.reconcile(s.athletes[this.team],{now,reset:!this.wasPredicting,other:g.cpuA.pos,goals:g.goals});this.predictionSnapshot=s;}
+      const ax=i.enabled&&fresh?i.axes():{x:0,y:0};
+      this.predictor.advance(dt,{moveX:ax.x,moveY:ax.y,yaw:p.yaw},{now,seq:sentThisFrame?this.seq:this.seq+1,actions:predictedActions,other:g.cpuA.pos,goals:g.goals});
+      p.pos.copy(this.predictor.sample(dt));p.vel.copy(this.predictor.actor.vel);p.grounded=this.predictor.actor.grounded;
+    }else if(this.wasPredicting)this.resetPrediction();
+    this.wasPredicting=predicting;
+    this.diagnostics={rttMs:this.latency,inputAckMs:this.diagnostics.inputAckMs,receiveAgeMs:age,frameMs:dt*1000,pendingInputs:this.sentInputs.size,predictionEntries:this.predictor?.history.length||0};
+    const warning=document.getElementById('netWarning');if(warning){const slow=active&&!this.localPaused&&(age>350||this.latency>500);warning.hidden=!slow;const text='通信が遅れています';if(slow&&warning.textContent!==text)warning.textContent=text;}
     g.cpu.facingDir.set(-Math.sin(g.cpuA.yaw),0,-Math.cos(g.cpuA.yaw));
     const d=g.disc,ds=s.disc,old=this.previous?.snapshot?.disc;d.state=ds.state;d.owner=ds.owner===this.team?'player':ds.owner?'cpu':null;d.lastShooter=ds.lastShooter===this.team?'player':ds.lastShooter?'cpu':null;d.vel.fromArray(ds.vel);d.bounces=ds.bounces;d.saved=ds.saved;d.curveRate=ds.curveRate;d.curveLeft=ds.curveLeft;d.flightId=ds.flightId;
     interpolate(d,'pos',ds.pos,old?.state===ds.state&&old?.flightId===ds.flightId?old.pos:null);d.prevPos.copy(d.pos);
     for(const k of g.keepers){k.z=s.keepers.find(x=>x.team===k.team)?.z||0;k.place();}
     g.score={...s.score};g.timeLeft=s.timeLeft;g.simTime=s.t;g.matchClock=s.clock;g.catchable=s.athletes[this.team].catchable;g.catchInRange=g.catchable;g.state=active?(this.localPaused?'paused':s.state):this.latest.status==='waiting'?'title':['ended','aborted'].includes(this.latest.status)?'ended':'paused';
     document.getElementById('netHud').hidden=active&&!this.localPaused;if(active&&!this.localPaused)this.status('オンライン対戦中');
-    updatePanelColliders(g.disc.panels,g.simTime);g.syncRoom();g.syncCamera(dt);g.updateVisuals(dt,active&&!this.localPaused);
+    updatePanelColliders(g.disc.panels,g.simTime);g.syncRoom();g.syncCamera(dt);g.updateVisuals(dt,active&&!this.localPaused,true);
   }
 }

@@ -15,7 +15,7 @@ export class MatchSimulation {
     this.gravity=new ArenaGravitySystem(()=>{});this.goals=new GoalSystem(this.gravity);this.rng=new Rng(seed);
     this.keepers=teams.map((t,i)=>new KeeperPhysics(t,i*Math.PI/2));for(const k of this.keepers)k.setHome(this.goals.active()[k.team]);
     this.disc=new DiscPhysics(this.keepers,this.goals,this.gravity);this.athletes={cyan:new Athlete('player','cyan'),pink:new Athlete('cpu','pink')};
-    this.inputs={};this.queues={cyan:[],pink:[]};this.seq={cyan:-1,pink:-1};this.lastInputT={cyan:0,pink:0};
+    this.inputs={};this.queues={cyan:[],pink:[]};this.seq={cyan:-1,pink:-1};this.appliedSeq={cyan:-1,pink:-1};this.lastInputT={cyan:0,pink:0};
     this.score={cyan:0,pink:0};this.timeLeft=C.MATCH_TIME;this.simTime=0;this.matchClock=0;this.state='waiting';this.events=[];this.eventSeq=0;this.resetPositions();
   }
   resetPositions(restartTeam=null){
@@ -60,7 +60,7 @@ export class MatchSimulation {
   }
   move(team,dt){
     const a=this.athletes[team],other=this.athletes[team==='cyan'?'pink':'cyan'];let i=this.queues[team].shift();
-    if(i){this.inputs[team]={...this.inputs[team],yaw:i.yaw??a.yaw,pitch:i.pitch??a.pitch,moveX:i.moveX??0,moveY:i.moveY??0,curve:(i.curveEpoch??0)===a.curveEpoch?(i.curve??a.curve):a.curve};a.yaw=this.inputs[team].yaw;a.pitch=this.inputs[team].pitch;a.curve=this.inputs[team].curve;}
+    if(i){this.appliedSeq[team]=i.seq;this.inputs[team]={...this.inputs[team],yaw:i.yaw??a.yaw,pitch:i.pitch??a.pitch,moveX:i.moveX??0,moveY:i.moveY??0,curve:(i.curveEpoch??0)===a.curveEpoch?(i.curve??a.curve):a.curve};a.yaw=this.inputs[team].yaw;a.pitch=this.inputs[team].pitch;a.curve=this.inputs[team].curve;}
     else i={};
     if(this.simTime-this.lastInputT[team]>.5){this.inputs[team].moveX=this.inputs[team].moveY=0;a.chargeStart=null;}
     const input=this.inputs[team],flat=new THREE.Vector3(-Math.sin(a.yaw),0,-Math.cos(a.yaw)),wish=flat.clone().multiplyScalar(input.moveY).addScaledVector(this.right(a),input.moveX);if(wish.lengthSq()>1)wish.normalize();
@@ -101,7 +101,7 @@ export class MatchSimulation {
     }
   }
   snapshot(){
-    const athletes={};for(const team of teams){const a=this.athletes[team];athletes[team]={...a.snapshot(),yaw:a.yaw,pitch:a.pitch,curve:a.curve,curveEpoch:a.curveEpoch,chargeStart:a.chargeStart,justUntil:a.justUntil,wallShotUntil:a.wallShotUntil,holdTime:a.holdTime,catchWindow:a.catchWindow,catchCd:a.catchCd,dashCd:a.dashCd,dashTime:a.dashTime,catchable:!a.holding&&a.dashTime<=0&&this.catchEval(team).ok,ack:this.seq[team]};}
+    const athletes={};for(const team of teams){const a=this.athletes[team];athletes[team]={...a.snapshot(),yaw:a.yaw,pitch:a.pitch,curve:a.curve,curveEpoch:a.curveEpoch,chargeStart:a.chargeStart,justUntil:a.justUntil,wallShotUntil:a.wallShotUntil,holdTime:a.holdTime,catchWindow:a.catchWindow,catchCd:a.catchCd,dashCd:a.dashCd,dashTime:a.dashTime,catchable:!a.holding&&a.dashTime<=0&&this.catchEval(team).ok,ack:this.appliedSeq[team],movement:{airTime:a.airTime,sinceTakeoff:a.sinceTakeoff,kickLock:a.kickLock,slidOff:a.slidOff,floor:a.floorFace?.id||null,dashVec:a.dashVec.toArray()}};}
     return {t:this.simTime,clock:this.matchClock,state:this.state,timeLeft:this.timeLeft,countT:this.countT||0,score:{...this.score},athletes,disc:{...this.disc.snapshot(),owner:teamOf(this.disc.owner),lastShooter:teamOf(this.disc.lastShooter),curveRate:this.disc.curveRate,curveLeft:this.disc.curveLeft,flightId:this.disc.flightId||0},keepers:this.keepers.map(k=>({team:k.team,z:k.z})),events:[...this.events]};
   }
 }
