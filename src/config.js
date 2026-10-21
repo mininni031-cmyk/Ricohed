@@ -34,14 +34,14 @@ export const CATCH = {
   range: 2.3,        // m (v2.9.3: 3.10)
   angleDeg: 55,      // max angle between the aim and the disc (v2.9.3: 72)
   window: 0.75,      // s after pressing CATCH (v2.9.3: 0.90)
-  rescue: 0.30,      // s: short late-catch grace period (v2.9.3: 0.38)
-  cooldown: 0.15,     // s after a window that caught nothing
+  rescue: 0.20,      // s: short late-catch grace period (v2.9.3: 0.38)
+  cooldown: 0.25,     // s after a window that caught nothing
   suctionTime: 0.1,  // s visual pull of the disc into the hand on success
   justWindow: 0.15, // seconds either side of entering the catch zone
   counterWindow: 0.6,
   counterMultiplier: 1.15,
   shotBuffer: 0.15,
-  approachSlack: 1.0,// a disc flying away is only catchable when closer than this
+  approachSlack: 0.7,// a disc flying away is only catchable when closer than this
 };
 // The CPU has its own catch rules (reaction delay / skill on top, see CPU_PRESETS)
 export const CPU_CATCH = { range: 2.3, angleDeg: 60, window: 0.5, cooldown: 0.8 };
