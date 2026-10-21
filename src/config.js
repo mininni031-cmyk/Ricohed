@@ -32,7 +32,7 @@ export const GRAVITY_SHIFT = {
 // Tested along the disc's path between simulation sub-steps (no tunnelling).
 export const CATCH = {
   range: 2.3,        // m (v2.9.3: 3.10)
-  angleDeg: 62,      // max angle between the aim and the disc (v2.9.3: 72)
+  angleDeg: 55,      // max angle between the aim and the disc (v2.9.3: 72)
   window: 0.75,      // s after pressing CATCH (v2.9.3: 0.90)
   rescue: 0.30,      // s: short late-catch grace period (v2.9.3: 0.38)
   cooldown: 0.15,     // s after a window that caught nothing

@@ -56,7 +56,7 @@ test('catch, goal, ceiling and online match physics constants preserved',()=>{
  assert.equal(C.GOAL_A,12/2.5);assert.equal(C.GOAL_B,1.25);
  assert.equal(C.MATCH_TIME,180);assert.equal(C.SIM_STEP,1/120);
  assert.equal(C.SHOT_SPEED,16);
- assert.equal(CATCH.range,2.3);assert.equal(CATCH.angleDeg,62);
+ assert.equal(CATCH.range,2.3);assert.equal(CATCH.angleDeg,55);
  assert.equal(CATCH.window,0.75);assert.equal(CATCH.rescue,0.3);
 });
 // 5. Source, playable asset, deploy metadata and cache-bust match.
