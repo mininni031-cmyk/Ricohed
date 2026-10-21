@@ -44,7 +44,7 @@ export const CATCH = {
   approachSlack: 1.0,// a disc flying away is only catchable when closer than this
 };
 // The CPU has its own catch rules (reaction delay / skill on top, see CPU_PRESETS)
-export const CPU_CATCH = { range: 2.6, angleDeg: 60, window: 0.5, cooldown: 0.8 };
+export const CPU_CATCH = { range: 2.3, angleDeg: 60, window: 0.5, cooldown: 0.8 };
 
 export const CPU_PRESETS = {
   // reaction = perception delay (s); aimError = degrees of random spread
