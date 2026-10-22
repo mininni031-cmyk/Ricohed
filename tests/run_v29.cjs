@@ -21,6 +21,7 @@ setup();g.lastOkCatchT=-99;g.disc.launch(g.player.eye().add(V(2.5,0,0)),V(-1,0,0
 for(const [name,fold,value] of [['direct',z=>z,1],['one',z=>2*(R.ROOM.W-R.CONFIG.DISC_RADIUS)-z,2],['two',z=>4*(R.ROOM.W-R.CONFIG.DISC_RADIUS)+z,3]]){clean();TT.noKeepers();const m=g.goals.active().pink;const o=TT.canon(.5,-R.ROOM.L+R.CONFIG.GOAL_Y,-.4),t=m.center.clone();t.x-=R.CONFIG.DISC_RADIUS;t.z=fold(0);g.disc.launch(o,t.sub(o).normalize(),'player');TT.flyUntilDone();check('scoring '+name,g.score.cyan===value);}
 setup();g.player.catchWindow=.8;g.disc.pos.copy(g.player.eye().add(V(-2,0,2)));g.disc.prevPos.copy(g.disc.pos);g.lastOkCatchT=g.simTime-.1;g.pressCatch(g.player,'player');check('late rescue during active window',g.player.holding);
 setup();g.lastOkCatchT=g.simTime-(R.CATCH.rescue+.001);g.disc.pos.copy(g.player.eye().add(V(-2,0,2)));g.disc.prevPos.copy(g.disc.pos);g.pressCatch(g.player,'player');check('expired rescue rejected',!g.player.holding);
+setup();g.lastOkCatchT=g.simTime-.1;g.disc.pos.copy(g.player.eye().add(V(-4,0,0)));g.disc.prevPos.copy(g.disc.pos);g.pressCatch(g.player,'player');check('far rescue rejected (>rescueMaxDist)',!g.player.holding);
 clean();g.cpuFrozen=false;run(1200);
 check('CPU match simulation',g.timeLeft<170&&Number.isFinite(g.disc.pos.x));g.ui.update(0,g);g.render(0);
 setup();g.giveDisc('player',false);TT.key('KeyZ');run(1);check('curve left selection',g.player.curve===-1);g.playerShoot();const z0=g.disc.pos.z;run(12);check('curve bends left',g.disc.pos.z<z0-.01);

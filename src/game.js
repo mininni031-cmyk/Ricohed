@@ -442,7 +442,7 @@ export class Game {
       return false;
     }
     // late press: the disc was catchable a moment ago -> still yours
-    if (this.disc.state === 'FLYING' && this.catchFlightId === this.disc.flightId && this.simTime - this.lastOkCatchT <= CATCH.rescue && !this.disc.panels.some(p => segmentHitsOBB(a.eye(), this.disc.pos, p))) { this.giveDisc(who, true, true); this.lastPressResult = 'rescued'; return true; }
+    if (this.disc.state === 'FLYING' && this.catchFlightId === this.disc.flightId && this.simTime - this.lastOkCatchT <= CATCH.rescue && this.disc.pos.distanceTo(a.eye()) <= CATCH.rescueMaxDist && !this.disc.panels.some(p => segmentHitsOBB(a.eye(), this.disc.pos, p))) { this.giveDisc(who, true, true); this.lastPressResult = 'rescued'; return true; }
     if (this.disc.state !== 'FLYING') { a.catchBuffer = CATCH.rescue; this.lastPressResult = 'buffered'; return false; }
     this.openWindow(a, who);
     return true;
@@ -595,7 +595,7 @@ export class Game {
     this.lastCatchEval = ev;
     const can = this.canOpenWindow(this.player);
     this.catchInRange = ev.dist <= CATCH.range && !this.player.holding;
-    const rescue = d.state === 'FLYING' && this.catchFlightId === d.flightId && this.simTime - this.lastOkCatchT <= CATCH.rescue && !d.panels.some(p => segmentHitsOBB(this.player.eye(), d.pos, p));
+    const rescue = d.state === 'FLYING' && this.catchFlightId === d.flightId && this.simTime - this.lastOkCatchT <= CATCH.rescue && d.pos.distanceTo(this.player.eye()) <= CATCH.rescueMaxDist && !d.panels.some(p => segmentHitsOBB(this.player.eye(), d.pos, p));
     this.catchable = (ev.ok || rescue) && this.player.dashTime <= 0 && !this.player.holding && (can.ok || this.player.catchWindow > 0);
     this.catchBlock = ev.ok && !can.ok ? can.reason : null;
   }

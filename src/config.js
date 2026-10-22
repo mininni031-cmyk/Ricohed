@@ -42,6 +42,7 @@ export const CATCH = {
   counterMultiplier: 1.15,
   shotBuffer: 0.15,
   approachSlack: 0.7,// a disc flying away is only catchable when closer than this
+  rescueMaxDist: 3.0, // late-press rescue only while the disc is still this close (m)
 };
 // The CPU has its own catch rules (reaction delay / skill on top, see CPU_PRESETS)
 export const CPU_CATCH = { range: 2.3, angleDeg: 60, window: 0.5, cooldown: 0.8 };

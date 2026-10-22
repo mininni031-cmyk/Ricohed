@@ -34,7 +34,7 @@ export class MatchSimulation {
   pressCatch(team){
     const a=this.athletes[team];a.catchPressT=this.simTime;
     if(!this.canCatch(a)){if(a.holding||a.catchCd>0)a.catchBuffer=CATCH.rescue;return;}
-    if(this.disc.state==='FLYING'&&a.catchFlightId===this.disc.flightId&&this.simTime-a.lastOkCatchT<=CATCH.rescue&&!this.disc.panels.some(p=>segmentHitsOBB(a.eye(),this.disc.pos,p))){this.giveDisc(team,true,true);return;}
+    if(this.disc.state==='FLYING'&&a.catchFlightId===this.disc.flightId&&this.simTime-a.lastOkCatchT<=CATCH.rescue&&this.disc.pos.distanceTo(a.eye())<=CATCH.rescueMaxDist&&!this.disc.panels.some(p=>segmentHitsOBB(a.eye(),this.disc.pos,p))){this.giveDisc(team,true,true);return;}
     if(this.disc.state!=='FLYING'){a.catchBuffer=CATCH.rescue;return;}
     a.catchWindow=CATCH.window;a.catchWindowAge=0;
   }
