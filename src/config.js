@@ -30,8 +30,9 @@ export const GRAVITY_SHIFT = {
 
 // v2.6 catch rules (same for ground and air). Distance: eye -> disc centre.
 // Tested along the disc's path between simulation sub-steps (no tunnelling).
+const CATCH_REACH = 1.2; // m: shared close reach for player, CPU and late rescue
 export const CATCH = {
-  range: 2.3,        // m (v2.9.3: 3.10)
+  range: CATCH_REACH,
   angleDeg: 55,      // max angle between the aim and the disc (v2.9.3: 72)
   window: 0.75,      // s after pressing CATCH (v2.9.3: 0.90)
   rescue: 0.20,      // s: short late-catch grace period (v2.9.3: 0.38)
@@ -42,10 +43,10 @@ export const CATCH = {
   counterMultiplier: 1.15,
   shotBuffer: 0.15,
   approachSlack: 0.7,// a disc flying away is only catchable when closer than this
-  rescueMaxDist: 3.0, // late-press rescue only while the disc is still this close (m)
+  rescueMaxDist: CATCH_REACH, // late rescue must not extend the spatial reach
 };
 // The CPU has its own catch rules (reaction delay / skill on top, see CPU_PRESETS)
-export const CPU_CATCH = { range: 2.3, angleDeg: 60, window: 0.5, cooldown: 0.8 };
+export const CPU_CATCH = { range: CATCH_REACH, angleDeg: 60, window: 0.5, cooldown: 0.8 };
 
 export const CPU_PRESETS = {
   // reaction = perception delay (s); aimError = degrees of random spread

@@ -6,12 +6,14 @@ import {GoalSystem} from './goals.js';
 import {DiscPhysics,segmentHitsOBB,updatePanelColliders} from './physics.js';
 import {KeeperPhysics} from './keeper-physics.js';
 import {evalCatch} from './catch.js';
+import {measureCatch} from './catch-measurement.js';
 import {shotParameters} from './shot.js';
 import {Rng} from './rng.js';
 import {placeRestartDisc,restartPossession} from './restart.js';
 const teams=['cyan','pink'],who=t=>t==='cyan'?'player':'cpu',teamOf=w=>w==='player'?'cyan':w==='cpu'?'pink':null;
 export class MatchSimulation {
-  constructor({seed=20261014}={}){
+  constructor({seed=20261014,measureCatches=false}={}){
+    if(measureCatches)this.catchMeasurements=[];
     this.gravity=new ArenaGravitySystem(()=>{});this.goals=new GoalSystem(this.gravity);this.rng=new Rng(seed);
     this.keepers=teams.map((t,i)=>new KeeperPhysics(t,i*Math.PI/2));for(const k of this.keepers)k.setHome(this.goals.active()[k.team]);
     this.disc=new DiscPhysics(this.keepers,this.goals,this.gravity);this.athletes={cyan:new Athlete('player','cyan'),pink:new Athlete('cpu','pink')};
@@ -40,6 +42,7 @@ export class MatchSimulation {
   }
   giveDisc(team,caught,rescued=false){
     const a=this.athletes[team];const just=caught&&a.catchFlightId===this.disc.flightId&&Math.abs(a.catchPressT-a.firstCatchT)<=CATCH.justWindow+1e-9;
+    if(caught&&this.catchMeasurements){this.catchMeasurements.push(measureCatch(team,this.simTime,rescued?'rescue':a.catchWindowAge>0?'window':'immediate',a.eye(),this.forward(a),this.disc,this.catchEval(team)));if(this.catchMeasurements.length>128)this.catchMeasurements.shift();}
     for(const t of teams)this.athletes[t].holding=t===team;
     a.curveEpoch=(a.curveEpoch||0)+1;a.curve=0;this.inputs[team].curve=0;for(const pending of this.queues[team])pending.curve=0;
     this.disc.hold(who(team));a.holdTime=0;a.catchWindow=a.catchBuffer=0;a.justUntil=just?this.simTime+CATCH.counterWindow:-99;

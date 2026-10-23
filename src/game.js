@@ -28,6 +28,7 @@ import { toon, glowMat } from './toon.js';
 import { ArenaGravitySystem } from './gravity.js';
 import { GoalSystem } from './goals.js';
 import { evalCatch, REASON_JA } from './catch.js';
+import { measureCatch } from './catch-measurement.js';
 import { EventBus } from './events.js';
 import { Rng } from './rng.js';
 
@@ -617,6 +618,13 @@ export class Game {
 
   giveDisc(who, caught, rescued = false) {
     const a = who === 'player' ? this.player : this.cpuA;
+    if (caught && this.test) {
+      const eye = a.eye(), aim = who === 'player' ? this.forward(new THREE.Vector3()) : this.cpu.facingDir.clone().addScaledVector(a.up, this.disc.pos.clone().sub(eye).normalize().dot(a.up)).normalize();
+      const route = rescued ? 'rescue' : a.catchWindowAge > 0 ? 'window' : 'immediate';
+      this.catchMeasurements ??= [];
+      this.catchMeasurements.push(measureCatch(who, this.simTime, route, eye, aim, this.disc, this.catchEval(who)));
+      if (this.catchMeasurements.length > 128) this.catchMeasurements.shift();
+    }
     if (this.test) this.log.push({ type: caught ? 'catch' : 'pickup', who, t: this.simTime, airborne: !a.grounded, rescued, kickLock: a.kickLock > 0, wallKicks: a.wallKicks, shift: this.gravity.phase });
     const just = caught && who === 'player' && this.catchFlightId === this.disc.flightId && Math.abs(a.catchPressT - this.firstCatchT) <= CATCH.justWindow + 1e-9;
     a.justUntil = just ? this.simTime + CATCH.counterWindow : -99;

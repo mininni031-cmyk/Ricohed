@@ -51,12 +51,12 @@ test('four true side-wall bank shots score without extra panel hits',()=>{
  }
 });
 // 4. Gameplay rules other than arena horizontal geometry are unchanged.
-test('catch, goal, ceiling and online match physics constants preserved',()=>{
+test('close catch reach, goal, ceiling and online match physics constants',()=>{
  assert.equal(C.VERSION,'2.9.11');assert.equal(ROOM.CEILING_Y+ROOM.L,6.8);
  assert.equal(C.GOAL_A,12/2.5);assert.equal(C.GOAL_B,1.25);
  assert.equal(C.MATCH_TIME,180);assert.equal(C.SIM_STEP,1/120);
  assert.equal(C.SHOT_SPEED,16);
- assert.equal(CATCH.range,2.3);assert.equal(CATCH.angleDeg,55);
+ assert.equal(CATCH.range,1.2);assert.equal(CATCH.angleDeg,55);
  assert.equal(CATCH.window,0.75);assert.equal(CATCH.rescue,0.2);
 });
 // 5. Source, playable asset, deploy metadata and cache-bust match.

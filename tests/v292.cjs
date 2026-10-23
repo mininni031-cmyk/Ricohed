@@ -4,8 +4,8 @@ const {CATCH,CONFIG,evalCatch,THREE,buildPanelColliders,updatePanelColliders,Mat
 const eye=new THREE.Vector3(),aim=new THREE.Vector3(1,0,0);
 const discAt=(distance,angle=0)=>{const pos=new THREE.Vector3(Math.cos(angle)*distance,0,Math.sin(angle)*distance);return {state:'FLYING',pos,prevPos:pos.clone(),vel:pos.clone().negate()};};
 assert.equal(evalCatch(CATCH,eye,aim,discAt(3.2),[]).ok,false,'outside updated reach');
-assert.equal(evalCatch(CATCH,eye,aim,discAt(2,76*Math.PI/180),[]).ok,false,'must face incoming disc');
-assert.equal(evalCatch(CATCH,eye,aim,discAt(2,40*Math.PI/180),[]).ok,true);
+assert.equal(evalCatch(CATCH,eye,aim,discAt(1,76*Math.PI/180),[]).ok,false,'must face incoming disc');
+assert.equal(evalCatch(CATCH,eye,aim,discAt(1,40*Math.PI/180),[]).ok,true);
 assert.equal(CATCH.window,.75);assert.equal(CONFIG.GOAL_Y,2.3);assert.equal(CONFIG.GOAL_A,12/2.5);assert.equal(CONFIG.GOAL_B,1.25);
 const panels=buildPanelColliders(),fixed=panels[1].center.clone(),start=panels[0].center.clone();updatePanelColliders(panels,2);
 assert.ok(panels[0].center.distanceTo(start)>.5,'upper panel moves');assert.ok(panels[1].center.equals(fixed),'lower panel stays fixed');
